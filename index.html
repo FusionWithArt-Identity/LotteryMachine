@@ -26,7 +26,7 @@
             width: 100%;
             height: 100%;
             background: inherit;
-            z-index: -1; /* Places it behind all content */
+            z-index: -1;
         }
 
         /* Disable Printing */
@@ -36,35 +36,13 @@
             }
         }
 
-        /* Disable Clicking Globally */
-        .modal-active * {
-            pointer-events: none;
-            user-select: none;
-        }
-
-        /* Allow Clicking for Specific Functional Elements */
-        .modal-active input,
-        .modal-active button,
-        .modal-active #lockButton,
-        .modal-active #customModal,
-        .modal-active #customModal * {
-            pointer-events: auto;
-        }
-
-        /* Smooth Background Movement */
+        /* Smooth Background Animation */
         @keyframes smoothBackgroundMovement {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Header Text Styling */
         h1, h2, p {
             text-align: center;
             color: white;
@@ -73,10 +51,10 @@
         #main-header {
             margin-bottom: 30px;
             animation: horizontalOscillate 2s infinite alternate;
-            font-family: 'Garamond', serif; /* Garamond font style */
+            font-family: 'Garamond', serif;
         }
 
-        /* Lock Button Styling */
+        /* Lock Button */
         #lockButton {
             position: fixed;
             top: 20px;
@@ -91,7 +69,7 @@
             background-color: cyan;
         }
 
-        /* Modal Window Styling */
+        /* Modal */
         #customModal {
             display: none;
             position: fixed;
@@ -105,7 +83,6 @@
 
         #modalContent {
             background-color: cyan;
-            margin: 0;
             padding: 20px;
             width: 300px;
             border-radius: 8px;
@@ -113,17 +90,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 9998;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 40px;
-        }
-
-        /* Modal Header Text Color */
-        #modalContent p {
-            color: black;  /* Set text color to black for the header */
+            text-align: center;
         }
 
         #modalContent span {
@@ -148,7 +115,6 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            text-align: center;
             margin-top: 15px;
         }
 
@@ -158,17 +124,7 @@
             display: none;
         }
 
-        /* Animations */
-        @keyframes horizontalOscillate {
-            from {
-                transform: translateX(-10px);
-            }
-            to {
-                transform: translateX(10px);
-            }
-        }
-
-        /* Login Page Styling */
+        /* Login Page */
         #login-page {
             display: flex;
             flex-direction: column;
@@ -188,7 +144,6 @@
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
             text-align: center;
             backdrop-filter: blur(10px);
-            animation: oscillate 3s infinite alternate;
         }
 
         #login-box h2 {
@@ -205,7 +160,6 @@
             border: 1px solid #ddd;
             outline: none;
             text-align: center;
-            box-sizing: border-box;
             font-size: 1rem;
         }
 
@@ -227,39 +181,6 @@
         #login-button:hover {
             background: linear-gradient(45deg, #3333ff, #ff00cc);
         }
-
-        /* Animations for Oscillate */
-        @keyframes oscillate {
-            from {
-                transform: translateY(0);
-            }
-            to {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            #login-box {
-                padding: 15px;
-            }
-
-            #login-box h2 {
-                font-size: 1.25rem;
-            }
-
-            #login-box input {
-                font-size: 0.9rem;
-            }
-
-            #login-button {
-                font-size: 0.9rem;
-            }
-        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
@@ -274,74 +195,46 @@
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const lockDocRef = db.collection("globalState").doc("lockState");
 
-        // Function to toggle the modal
         function toggleModal(show) {
             document.getElementById("customModal").style.display = show ? "block" : "none";
         }
 
-        // Function to toggle the lock state
         function toggleLock() {
             const password = document.getElementById("passwordInput").value;
             if (password === "123") {
                 lockDocRef.get().then((doc) => {
                     const isLocked = doc.exists ? doc.data().locked : false;
-                    lockDocRef.set({ locked: !isLocked })
-                        .then(() => {
-                            console.log("Lock state updated successfully!");
-                            toggleModal(false);
-                            document.getElementById("passwordInput").value = "";
-                            document.getElementById("errorMsg").style.display = "none";
-                        })
-                        .catch((error) => {
-                            console.error("Error updating lock state: ", error);
-                        });
-                });
+                    return lockDocRef.set({ locked: !isLocked }, { merge: true });
+                }).then(() => {
+                    toggleModal(false);
+                    document.getElementById("passwordInput").value = "";
+                    document.getElementById("errorMsg").style.display = "none";
+                }).catch(console.error);
             } else {
                 document.getElementById("errorMsg").style.display = "block";
             }
         }
 
-        // Function to update the lock button text and color
         function updateLockButton(isLocked) {
             const lockButton = document.getElementById("lockButton");
             lockButton.textContent = isLocked ? "Inactive" : "Active";
             lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
         }
 
-        // Listen for changes in the lock state
         lockDocRef.onSnapshot((doc) => {
-            if (doc.exists) {
-                updateLockButton(doc.data().locked);
-            }
+            if (doc.exists) updateLockButton(doc.data().locked);
         });
 
-        // Check lock state on page load
-        window.onload = () => {
-            lockDocRef.get().then((doc) => {
-                if (doc.exists && doc.data().locked) {
-                    alert("The site is currently locked.");
-                }
-                updateLockButton(doc.data()?.locked || false);
-            });
-        };
-
-        // Function to handle login
         function checkLogin() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
-
-            // Example of hardcoded credentials for demonstration purposes
-            const validUsername = "admin";
-            const validPassword = "password";
-
-            if (username === validUsername && password === validPassword) {
+            if (username === "Mihir" && password === "123") {
                 alert("Login successful!");
-                // Redirect or perform other actions after successful login
+                window.location.href = "main.html";
             } else {
                 alert("Invalid username or password!");
             }
@@ -354,20 +247,12 @@
         <h1 id="main-header">Login to Your Account</h1>
         <div id="login-box">
             <h2>Enter Credentials</h2>
-            <input type="text" id="username" placeholder="Username" required><br><br>
-            <input type="password" id="password" placeholder="Password" required><br><br>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
             <button id="login-button" onclick="checkLogin()">Log In</button>
         </div>
     </div>
     <button id="lockButton" onclick="toggleModal(true)">Active</button>
-    <div id="customModal" style="display: none;">
-        <div id="modalContent">
-            <span style="pointer-events: auto;" onclick="toggleModal(false)">&times;</span>
-            <p>Enter password to lock/unlock the site:</p>
-            <input type="password" id="passwordInput" placeholder="Password">
-            <button id="submitBtn" onclick="toggleLock()">Submit</button>
-            <div id="errorMsg" style="display: none; color: red;">Incorrect password!</div>
-        </div>
-    </div>
+    <div id="customModal"><div id="modalContent"><span onclick="toggleModal(false)">&times;</span><p>Enter password:</p><input type="password" id="passwordInput"><button id="submitBtn" onclick="toggleLock()">Submit</button><div id="errorMsg">Incorrect password!</div></div></div>
 </body>
 </html>
