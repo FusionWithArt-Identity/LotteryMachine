@@ -18,7 +18,7 @@
 
             // ✅ Firebase Configuration
             const firebaseConfig = {
-                apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+                apiKey: "AIzaSyAT...",
                 authDomain: "lotterymachine-by-mmd.firebaseapp.com",
                 projectId: "lotterymachine-by-mmd",
                 storageBucket: "lotterymachine-by-mmd.appspot.com",
@@ -44,12 +44,10 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Strong Navigation Prevention
+            // ✅ Smooth Navigation Prevention Without Cursor Flickering
             function disableNavigation() {
                 history.pushState(null, null, location.href);
-                setInterval(() => {
-                    history.pushState(null, null, location.href);
-                }, 50);
+                requestAnimationFrame(disableNavigation);
             }
 
             // ✅ Block Keyboard Shortcuts for Navigation & Refresh
