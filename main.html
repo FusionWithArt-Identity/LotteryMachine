@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
-<script type="module">
+ <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -18,7 +18,7 @@
 
             // ✅ Firebase Configuration
             const firebaseConfig = {
-                apiKey: "AIzaSyAT...",
+                apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
                 authDomain: "lotterymachine-by-mmd.firebaseapp.com",
                 projectId: "lotterymachine-by-mmd",
                 storageBucket: "lotterymachine-by-mmd.appspot.com",
@@ -47,9 +47,9 @@
             // ✅ Strong Navigation Prevention
             function disableNavigation() {
                 history.pushState(null, null, location.href);
-                window.addEventListener("popstate", function () {
+                setInterval(() => {
                     history.pushState(null, null, location.href);
-                });
+                }, 50);
             }
 
             // ✅ Block Keyboard Shortcuts for Navigation & Refresh
@@ -61,23 +61,8 @@
                 }
             }
 
-            // ✅ Invisible Overlay Hack (Blocks Clicks on Browser UI)
-            function addNavigationBlocker() {
-                const blocker = document.createElement("div");
-                blocker.style.position = "fixed";
-                blocker.style.top = "0";
-                blocker.style.left = "0";
-                blocker.style.width = "100vw";
-                blocker.style.height = "100vh";
-                blocker.style.zIndex = "9999";
-                blocker.style.background = "transparent";
-                blocker.style.pointerEvents = "none";
-                document.body.appendChild(blocker);
-            }
-
             window.onload = function () {
                 disableNavigation();
-                setTimeout(disableNavigation, 0); // Reinforce prevention
                 
                 window.onbeforeunload = function (event) {
                     event.preventDefault();
@@ -85,7 +70,6 @@
                 };
                 
                 document.addEventListener("keydown", disableShortcuts);
-                addNavigationBlocker();
                 
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
