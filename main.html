@@ -44,13 +44,16 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Ensure Back/Forward Navigation Stays on Main Page
+            // ✅ Show Alert & Cancel Back/Forward Navigation
+            function blockNavigation(event) {
+                alert("Navigation Not Allowed!");
+                event.preventDefault();
+                history.pushState(null, "", location.href);
+            }
+
             function enforceNavigationBlock() {
                 history.pushState(null, "", location.href);
-                window.addEventListener("popstate", function (event) {
-                    alert("Navigation Not Allowed!");
-                    history.pushState(null, "", location.href);
-                });
+                window.addEventListener("popstate", blockNavigation);
             }
 
             // ✅ Block Keyboard Shortcuts for Navigation (Excluding F5)
