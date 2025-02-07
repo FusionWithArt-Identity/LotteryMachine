@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
- <script type="module">
+   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -17,16 +17,14 @@
                 return;
             }
 
-           // ✅ Firestore Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+          const firebaseConfig = {
+         apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
             authDomain: "lotterymachine-by-mmd.firebaseapp.com",
             projectId: "lotterymachine-by-mmd",
             storageBucket: "lotterymachine-by-mmd.appspot.com",
             messagingSenderId: "977277760191",
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-        };
-
+    };
 
 
             const app = initializeApp(firebaseConfig);
@@ -47,7 +45,7 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Prevent Navigation
+            // ✅ Prevent Navigation (Back and Forward)
             function preventNavigation() {
                 history.pushState(null, null, location.href);
                 window.onpopstate = function () {
@@ -55,9 +53,9 @@
                 };
             }
 
-            // ✅ Run on Page Load
             window.onload = function () {
                 preventNavigation();
+                setInterval(preventNavigation, 100);
 
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
@@ -82,7 +80,7 @@
                 document.body.appendChild(logoutButton);
             };
         });
-    </script>	
+    </script>
 </head>
 
 
