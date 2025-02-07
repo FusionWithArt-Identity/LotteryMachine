@@ -153,7 +153,6 @@
         const password = document.getElementById("password").value;
 
         if (btoa(username) === encodedUser && btoa(password) === encodedPass) {
-            sessionStorage.setItem("username", btoa(username));  // Store in Base64
             setTimeout(() => {
                 window.location.href = "main.html";
             }, 500);
@@ -172,7 +171,6 @@
                 if (isLocked) {
                     document.getElementById("login-box").style.display = "none";
                     document.getElementById("main-header").textContent = "🔒 Site is Locked";
-                    sessionStorage.removeItem("username"); // **Force logout on all devices**
                 } else {
                     document.getElementById("login-box").style.display = "block";
                     document.getElementById("main-header").textContent = "Login to Your Account";
@@ -193,10 +191,6 @@
         if (docSnap.exists()) {
             const isLocked = docSnap.data().locked;
             await updateDoc(lockRef, { locked: !isLocked });
-
-            if (!isLocked) {
-                sessionStorage.removeItem("username"); // **Immediately log out all users**
-            }
 
             alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
         }
