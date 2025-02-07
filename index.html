@@ -4,333 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
-    <style>
-        /* General Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(120deg, #87ceeb, #f0e68c, #ff7f50, #9370db);
-            background-size: 300% 300%;
-            animation: smoothBackgroundMovement 20s ease-in-out infinite;
-        }
-
-        .dynamic-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: inherit;
-            z-index: -1; /* Places it behind all content */
-        }
-
-        /* Disable Printing */
-        @media print {
-            body {
-                display: none;
-            }
-        }
-
-        /* Disable Clicking Globally */
-        .modal-active * {
-            pointer-events: none;
-            user-select: none;
-        }
-
-        /* Allow Clicking for Specific Functional Elements */
-        .modal-active input,
-        .modal-active button,
-        .modal-active #lockButton,
-        .modal-active #customModal,
-        .modal-active #customModal * {
-            pointer-events: auto;
-        }
-
-        /* Smooth Background Movement */
-        @keyframes smoothBackgroundMovement {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Header Text Styling */
-        h1, h2, p {
-            text-align: center;
-            color: white;
-        }
-
-        #main-header {
-            margin-bottom: 30px;
-            animation: horizontalOscillate 2s infinite alternate;
-            font-family: 'Garamond', serif; /* Garamond font style */
-        }
-
-        /* Lock Button Styling */
-        #lockButton {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 9999;
-            padding: 10px 20px;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-            background-color: cyan;
-        }
-
-        /* Modal Window Styling */
-        #customModal {
-            display: none;
-            position: fixed;
-            z-index: 9998;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.3);
-        }
-
-        #modalContent {
-            background-color: cyan;
-            margin: 0;
-            padding: 20px;
-            width: 300px;
-            border-radius: 8px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9998;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 40px;
-        }
-
-        /* Modal Header Text Color */
-        #modalContent p {
-            color: black;  /* Set text color to black for the header */
-        }
-
-        #modalContent span {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        #modalContent input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            box-sizing: border-box;
-        }
-
-        #submitBtn {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        #errorMsg {
-            color: red;
-            margin-top: 10px;
-            display: none;
-        }
-
-        /* Animations */
-        @keyframes horizontalOscillate {
-            from {
-                transform: translateX(-10px);
-            }
-            to {
-                transform: translateX(10px);
-            }
-        }
-
-        /* Login Page Styling */
-        #login-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        #login-box {
-            width: 90%;
-            max-width: 400px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            text-align: center;
-            backdrop-filter: blur(10px);
-            animation: oscillate 3s infinite alternate;
-        }
-
-        #login-box h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        #login-box input {
-            width: 90%;
-            max-width: 300px;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            outline: none;
-            text-align: center;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        #login-button {
-            width: 90%;
-            max-width: 200px;
-            padding: 10px;
-            border: none;
-            border-radius: 15px;
-            background: linear-gradient(45deg, #ff00cc, #3333ff);
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-
-        #login-button:hover {
-            background: linear-gradient(45deg, #3333ff, #ff00cc);
-        }
-
-        /* Animations for Oscillate */
-        @keyframes oscillate {
-            from {
-                transform: translateY(0);
-            }
-            to {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            #login-box {
-                padding: 15px;
-            }
-
-            #login-box h2 {
-                font-size: 1.25rem;
-            }
-
-            #login-box input {
-                font-size: 0.9rem;
-            }
-
-            #login-button {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
-        const encodedUser = "TWloaXI=";
-        const encodedPass = "MTIz";
-        const lockKey = "siteLocked";
-
-        function checkLogin() {
-            if (localStorage.getItem(lockKey) === "true") {
-                alert("The site is locked by the admin.");
-                return;
-            }
-
-            const user = document.getElementById("username").value;
-            const pass = document.getElementById("password").value;
-
-            if (btoa(user) === encodedUser && btoa(pass) === encodedPass) {
-                sessionStorage.setItem("username", user);
-                window.location.replace("main.html");
-            } else {
-                alert("Incorrect username or password.");
-            }
-        }
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+            projectId: "lotterymachine-by-mmd",
+            storageBucket: "lotterymachine-by-mmd.appspot.com",
+            messagingSenderId: "977277760191",
+            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const lockRef = database.ref("lockState");
 
         function toggleModal(show) {
             document.getElementById("customModal").style.display = show ? "block" : "none";
-            document.body.classList.toggle("modal-active", show);
         }
 
         function toggleLock() {
             const password = document.getElementById("passwordInput").value;
             if (password === "123") {
-                const isLocked = localStorage.getItem(lockKey) === "true";
-                localStorage.setItem(lockKey, !isLocked);
-                updateLockButton();
-                toggleModal(false); // Close modal after correct password
-                document.getElementById("passwordInput").value = "";
-                document.getElementById("errorMsg").style.display = "none";
+                lockRef.once("value").then(snapshot => {
+                    const isLocked = snapshot.val() || false;
+                    lockRef.set(!isLocked);
+                });
+                toggleModal(false);
             } else {
                 document.getElementById("errorMsg").style.display = "block";
             }
         }
 
-        function updateLockButton() {
-            const isLocked = localStorage.getItem(lockKey) === "true";
+        function updateLockButton(isLocked) {
             const lockButton = document.getElementById("lockButton");
             lockButton.textContent = isLocked ? "Inactive" : "Active";
             lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
         }
 
-        function checkIfLocked() {
-            if (localStorage.getItem(lockKey) === "true") {
+        lockRef.on("value", snapshot => {
+            const isLocked = snapshot.val() || false;
+            updateLockButton(isLocked);
+            if (isLocked) {
                 alert("The site is currently locked.");
             }
-            updateLockButton();
-        }
+        });
 
-        window.onload = checkIfLocked;
     </script>
 </head>
 <body>
-    <div class="dynamic-background"></div>
-
-    <div id="login-page">
-        <h1 id="main-header">Login to Your Account</h1>
-        <div id="login-box">
-            <h2>Enter Credentials</h2>
-            <input type="text" id="username" placeholder="Username" required><br><br>
-            <input type="password" id="password" placeholder="Password" required><br><br>
-            <button id="login-button" onclick="checkLogin()">Log In</button>
-        </div>
-    </div>
     <button id="lockButton" onclick="toggleModal(true)">Active</button>
     <div id="customModal">
         <div id="modalContent">
@@ -338,7 +63,7 @@
             <p>Enter password to lock/unlock the site:</p>
             <input type="password" id="passwordInput" placeholder="Password">
             <button id="submitBtn" onclick="toggleLock()">Submit</button>
-            <div id="errorMsg">Incorrect password!</div>
+            <div id="errorMsg" style="display:none; color:red;">Incorrect password!</div>
         </div>
     </div>
 </body>
