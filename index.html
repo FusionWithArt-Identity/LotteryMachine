@@ -126,7 +126,7 @@
         }
     </style>
 
-   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -210,8 +210,8 @@
         }
     }
 
-    // ✅ **Block Forward & Backward Navigation**
-    function preventNavigation() {
+    // ✅ **Fully Disable Back & Forward Navigation**
+    function disableNavigation() {
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.pushState(null, null, location.href);
@@ -220,7 +220,7 @@
 
     window.onload = () => {
         checkIfLocked();
-        preventNavigation();
+        disableNavigation();
     };
 
     window.toggleLock = toggleLock;
