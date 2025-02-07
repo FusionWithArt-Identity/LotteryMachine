@@ -11,10 +11,11 @@
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     document.addEventListener("DOMContentLoaded", function () {
-        const username = sessionStorage.getItem("username");
+        const encodedUser = "TWloaXI=";  // Base64 of "Mihir"
+        const storedUser = sessionStorage.getItem("username");
 
-        if (!username) {
-            window.location.replace("index.html"); // Redirect back to login if session is not found
+        if (!storedUser || btoa(atob(storedUser)) !== encodedUser) {
+            window.location.replace("index.html"); // Redirect back to login if invalid session
             return;
         }
 
@@ -27,7 +28,7 @@
             messagingSenderId: "977277760191",
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
         };
-	    
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const lockRef = doc(db, "site_settings", "lockState");
@@ -46,19 +47,19 @@
             window.location.replace("index.html"); // Redirect to login page
         }
 
-        // ✅ **Prevent Back Navigation After Logout**
-        function preventBack() {
+        // ✅ **Block Back & Forward Navigation**
+        function preventNavigation() {
             history.pushState(null, null, location.href);
             window.onpopstate = function () {
-                history.go(1);
+                history.pushState(null, null, location.href);
             };
         }
 
         window.onload = function () {
-            preventBack();
+            preventNavigation();
 
-            const username = sessionStorage.getItem("username");
-            if (!username) {
+            // ✅ **Ensure User is Logged In**
+            if (!sessionStorage.getItem("username")) {
                 window.location.replace("index.html");
                 return;
             }
@@ -80,19 +81,9 @@
             `;
             document.body.appendChild(logoutButton);
         };
+
+        window.addEventListener("load", preventNavigation);
     });
-
-	function preventBack() {
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.pushState(null, null, location.href);
-        };
-    }
-
-    window.onload = function () {
-        preventBack();
-        window.addEventListener("load", preventBack);
-    };
 </script>
 
 
