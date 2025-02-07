@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
-
-  <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -48,49 +47,34 @@
             // ✅ Prevent Backward & Forward Navigation Completely
             function disableNavigation() {
                 history.pushState(null, null, location.href);
-                window.onpopstate = function () {
+                window.addEventListener("popstate", function () {
                     history.pushState(null, null, location.href);
-                };
+                });
             }
 
             // ✅ Disable Keyboard Shortcuts for Reload & Navigation
             function disableShortcuts(event) {
-                if (
-                    event.key === "F5" || 
-                    (event.ctrlKey && event.key === "r") || 
-                    (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) ||
-                    (event.ctrlKey && (event.key === "[" || event.key === "]"))
-                ) {
+                if (["F5", "ArrowLeft", "ArrowRight"].includes(event.key) || 
+                    (event.ctrlKey && ["r", "R", "[", "]"].includes(event.key)) ||
+                    (event.altKey && ["ArrowLeft", "ArrowRight"].includes(event.key))) {
                     event.preventDefault();
                 }
             }
 
-            // ✅ Force Fullscreen Mode to Hide UI Controls
-            function requestFullScreen() {
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.mozRequestFullScreen) { /* Firefox */
-                    elem.mozRequestFullScreen();
-                } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari, and Opera */
-                    elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) { /* IE/Edge */
-                    elem.msRequestFullscreen();
-                }
+            // ✅ Hide Browser UI (Works in Some Kiosk Modes)
+            function hideUI() {
+                window.open(location.href, "_self");
             }
 
             window.onload = function () {
                 disableNavigation();
-                setTimeout(disableNavigation, 0); // Ensure it runs after loading
-                requestFullScreen(); // Activate fullscreen mode
-                
                 window.onbeforeunload = function (event) {
                     event.preventDefault();
                     event.returnValue = "";
                 };
-                
                 document.addEventListener("keydown", disableShortcuts);
-
+                setTimeout(hideUI, 500);
+                
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
                     return;
@@ -114,8 +98,8 @@
                 document.body.appendChild(logoutButton);
             };
         });
-    </script>	
-   </head>
+    </script>
+    </head>
 
 
 <body>
