@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
-
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -37,39 +35,51 @@
             }
         });
 
-        // ✅ **Completely Disable Back, Forward & Refresh**
+        // ✅ **Fully Disable Back, Forward & Refresh**
         function disableNavigationAndRefresh() {
+            // 🔹 Disable Back & Forward Navigation
             history.pushState(null, null, location.href);
             window.onpopstate = function () {
                 history.pushState(null, null, location.href);
             };
 
+            // 🔹 Continuously Prevent Navigation
+            setInterval(() => {
+                history.pushState(null, null, location.href);
+            }, 100);
+
+            // 🔹 Disable Refresh (F5, Ctrl+R, Cmd+R, Browser Button)
             document.addEventListener("keydown", function (event) {
                 if (
                     event.key === "F5" || 
-                    event.key === "ArrowLeft" || 
-                    event.key === "ArrowRight" || 
                     (event.ctrlKey && event.key === "r") || 
-                    (event.metaKey && event.key === "r") || 
-                    (event.ctrlKey && event.key === "ArrowLeft") || 
-                    (event.ctrlKey && event.key === "ArrowRight")
+                    (event.metaKey && event.key === "r") ||
+                    (event.ctrlKey && event.shiftKey && event.key === "R") ||
+                    event.key === "Escape"
                 ) {
                     event.preventDefault();
+                    alert("Page refresh is disabled!");
                 }
             });
 
+            // 🔹 Block Swipe-to-Refresh on Mobile
+            window.addEventListener("touchmove", function (event) {
+                event.preventDefault();
+            }, { passive: false });
+
+            // 🔹 Prevent Closing Tab or Refreshing
             window.addEventListener("beforeunload", function (event) {
                 event.preventDefault();
                 return event.returnValue = "Are you sure you want to leave?";
             });
 
-            // ✅ **Disable Right-Click & DevTools (Optional)**
+            // 🔹 Block Right-Click & DevTools
             document.addEventListener("contextmenu", function (event) {
                 event.preventDefault();
             });
 
             document.addEventListener("keydown", function (event) {
-                if (event.ctrlKey && (event.key === "u" || event.key === "U" || event.key === "s" || event.key === "S")) {
+                if (event.ctrlKey && (event.key === "u" || event.key === "s" || event.key === "i" || event.key === "p")) {
                     event.preventDefault();
                 }
             });
@@ -104,7 +114,6 @@
         window.addEventListener("load", disableNavigationAndRefresh);
     });
 </script>
-
 
 	
 </head>
