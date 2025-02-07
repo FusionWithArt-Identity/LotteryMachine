@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
- <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -44,10 +44,16 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Smooth Navigation Prevention Without Cursor Flickering
-            function disableNavigation() {
-                history.pushState(null, null, location.href);
-                requestAnimationFrame(disableNavigation);
+            // ✅ Show Alert & Cancel Back/Forward Navigation
+            function blockNavigation(event) {
+                alert("Navigation Not Allowed!");
+                event.preventDefault();
+                history.pushState(null, "", location.href);
+            }
+
+            function enforceNavigationBlock() {
+                history.pushState(null, "", location.href);
+                window.addEventListener("popstate", blockNavigation);
             }
 
             // ✅ Block Keyboard Shortcuts for Navigation & Refresh
@@ -56,11 +62,12 @@
                     (event.ctrlKey && ["r", "R", "[", "]"].includes(event.key)) ||
                     (event.altKey && ["ArrowLeft", "ArrowRight"].includes(event.key))) {
                     event.preventDefault();
+                    alert("Navigation Not Allowed!");
                 }
             }
 
             window.onload = function () {
-                disableNavigation();
+                enforceNavigationBlock();
                 
                 window.onbeforeunload = function (event) {
                     event.preventDefault();
