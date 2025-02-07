@@ -47,10 +47,12 @@
             document.addEventListener("keydown", function (event) {
                 if (
                     event.key === "F5" || 
+                    event.key === "ArrowLeft" || 
+                    event.key === "ArrowRight" || 
                     (event.ctrlKey && event.key === "r") || 
-                    (event.metaKey && event.key === "r") ||
-                    (event.ctrlKey && event.key === "F5") ||
-                    (event.metaKey && event.key === "F5")
+                    (event.metaKey && event.key === "r") || 
+                    (event.ctrlKey && event.key === "ArrowLeft") || 
+                    (event.ctrlKey && event.key === "ArrowRight")
                 ) {
                     event.preventDefault();
                 }
@@ -58,7 +60,18 @@
 
             window.addEventListener("beforeunload", function (event) {
                 event.preventDefault();
-                event.returnValue = "Are you sure you want to leave?";
+                return event.returnValue = "Are you sure you want to leave?";
+            });
+
+            // ✅ **Disable Right-Click & DevTools (Optional)**
+            document.addEventListener("contextmenu", function (event) {
+                event.preventDefault();
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.ctrlKey && (event.key === "u" || event.key === "U" || event.key === "s" || event.key === "S")) {
+                    event.preventDefault();
+                }
             });
         }
 
@@ -91,6 +104,7 @@
         window.addEventListener("load", disableNavigationAndRefresh);
     });
 </script>
+
 
 	
 </head>
