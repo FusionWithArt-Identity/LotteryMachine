@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
-        /* General Styles */
         body {
             margin: 0;
             padding: 0;
@@ -18,7 +17,6 @@
             background-size: 300% 300%;
             animation: smoothBackgroundMovement 20s ease-in-out infinite;
         }
-
         .dynamic-background {
             position: fixed;
             top: 0;
@@ -28,43 +26,16 @@
             background: inherit;
             z-index: -1;
         }
-
         @media print {
-            body {
-                display: none;
-            }
+            body { display: none; }
         }
-
-        .modal-active * {
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .modal-active input,
-        .modal-active button,
-        .modal-active #lockButton,
-        .modal-active #customModal,
-        .modal-active #customModal * {
-            pointer-events: auto;
-        }
-
         @keyframes smoothBackgroundMovement {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        h1, h2, p {
-            text-align: center;
-            color: white;
-        }
-
-        #main-header {
-            margin-bottom: 30px;
-            animation: horizontalOscillate 2s infinite alternate;
-            font-family: 'Garamond', serif;
-        }
-
+        h1, h2, p { text-align: center; color: white; }
+        #main-header { margin-bottom: 30px; font-family: 'Garamond', serif; }
         #lockButton {
             position: fixed;
             top: 20px;
@@ -78,87 +49,6 @@
             transition: 0.3s;
             background-color: cyan;
         }
-
-        #customModal {
-            display: none;
-            position: fixed;
-            z-index: 9998;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.3);
-        }
-
-        #modalContent {
-            background-color: cyan;
-            margin: 0;
-            padding: 20px;
-            width: 300px;
-            border-radius: 8px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9998;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 40px;
-        }
-
-        #modalContent p {
-            color: black;
-        }
-
-        #modalContent span {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        #modalContent input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            box-sizing: border-box;
-        }
-
-        #submitBtn {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        #errorMsg {
-            color: red;
-            margin-top: 10px;
-            display: none;
-        }
-
-        @keyframes horizontalOscillate {
-            from { transform: translateX(-10px); }
-            to { transform: translateX(10px); }
-        }
-
-        #login-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: 100%;
-            height: 100%;
-        }
-
         #login-box {
             width: 90%;
             max-width: 400px;
@@ -168,68 +58,105 @@
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
             text-align: center;
             backdrop-filter: blur(10px);
-            animation: oscillate 3s infinite alternate;
         }
-
-        @keyframes oscillate {
-            from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
+        #login-box input {
+            width: 90%;
+            max-width: 300px;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            outline: none;
+            text-align: center;
+            font-size: 1rem;
+        }
+        #login-button {
+            width: 90%;
+            max-width: 200px;
+            padding: 10px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
         const firebaseConfig = {
-            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+            apiKey: "AIzaSyAT...",
             authDomain: "lotterymachine-by-mmd.firebaseapp.com",
             projectId: "lotterymachine-by-mmd",
             storageBucket: "lotterymachine-by-mmd.appspot.com",
             messagingSenderId: "977277760191",
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
         };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const lockDocRef = db.collection("globalState").doc("lockState");
-
-        function toggleModal(show) {
-            document.getElementById("customModal").style.display = show ? "block" : "none";
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const lockRef = doc(db, "site_settings", "lockState");
+        
+        function checkIfLocked() {
+            onSnapshot(lockRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const isLocked = docSnap.data().locked;
+                    updateLockButton(isLocked);
+                    if (isLocked) {
+                        document.getElementById("login-box").style.display = "none";
+                        document.getElementById("main-header").textContent = "🔒 Site is Locked";
+                        sessionStorage.removeItem("username");
+                    } else {
+                        document.getElementById("login-box").style.display = "block";
+                        document.getElementById("main-header").textContent = "Login to Your Account";
+                    }
+                }
+            });
         }
-
-        function toggleLock() {
-            const password = document.getElementById("passwordInput").value;
-            if (password === "123") {
-                lockDocRef.get().then(doc => {
-                    const isLocked = doc.exists && doc.data().locked;
-                    lockDocRef.set({ locked: !isLocked }).then(() => {
-                        updateLockButton(!isLocked);
-                        toggleModal(false);
-                        document.getElementById("passwordInput").value = "";
-                        document.getElementById("errorMsg").style.display = "none";
-                    });
-                });
-            } else {
-                document.getElementById("errorMsg").style.display = "block";
+        
+        async function toggleLock() {
+            const password = prompt("Enter Password:");
+            if (password !== "123") {
+                alert("Wrong password!");
+                return;
+            }
+            const docSnap = await getDoc(lockRef);
+            if (docSnap.exists()) {
+                const isLocked = docSnap.data().locked;
+                await updateDoc(lockRef, { locked: !isLocked });
+                if (!isLocked) sessionStorage.removeItem("username");
+                alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
             }
         }
-
+        
         function updateLockButton(isLocked) {
             const lockButton = document.getElementById("lockButton");
             lockButton.textContent = isLocked ? "Inactive" : "Active";
             lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
         }
-
-        lockDocRef.onSnapshot(doc => {
-            updateLockButton(doc.exists && doc.data().locked);
-        });
-
+        
         function checkLogin() {
-            if (document.getElementById("username").value === "Mihir" &&
-                document.getElementById("password").value === "123") {
-                window.location.href = "main.html";
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            if (username === "Mihir" && password === "123") {
+                sessionStorage.setItem("username", username);
+                setTimeout(() => window.location.href = "main.html", 500);
             } else {
-                alert("Invalid username or password!");
+                alert("Invalid credentials. Try again.");
             }
+        }
+        
+        window.onload = () => { checkIfLocked(); preventForward(); };
+        window.toggleLock = toggleLock;
+        window.checkLogin = checkLogin;
+        
+        function preventForward() {
+            history.pushState(null, null, location.href);
+            window.onpopstate = () => history.pushState(null, null, location.href);
         }
     </script>
 </head>
@@ -238,12 +165,11 @@
     <div id="login-page">
         <h1 id="main-header">Login to Your Account</h1>
         <div id="login-box">
-            <h2>Enter Credentials</h2>
-            <input type="text" id="username"><br>
-            <input type="password" id="password"><br>
-            <button onclick="checkLogin()">Log In</button>
+            <input type="text" id="username" placeholder="Username"><br><br>
+            <input type="password" id="password" placeholder="Password"><br><br>
+            <button id="login-button" onclick="checkLogin()">Log In</button>
         </div>
     </div>
-    <button id="lockButton" onclick="toggleModal(true)">Active</button>
+    <button id="lockButton" onclick="toggleLock()">Active</button>
 </body>
 </html>
