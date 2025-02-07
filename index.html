@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
-       /* General Styles */
+        /* General Styles */
         body {
             margin: 0;
             padding: 0;
@@ -264,6 +264,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script>
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
             authDomain: "lotterymachine-by-mmd.firebaseapp.com",
@@ -272,42 +273,54 @@
             messagingSenderId: "977277760191",
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
         };
-        
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const lockDocRef = db.collection("globalState").doc("lockState");
-        
+
+        // Function to toggle the modal
         function toggleModal(show) {
             document.getElementById("customModal").style.display = show ? "block" : "none";
         }
-        
+
+        // Function to toggle the lock state
         function toggleLock() {
             const password = document.getElementById("passwordInput").value;
             if (password === "123") {
                 lockDocRef.get().then((doc) => {
                     const isLocked = doc.exists ? doc.data().locked : false;
-                    lockDocRef.set({ locked: !isLocked });
-                    toggleModal(false);
-                    document.getElementById("passwordInput").value = "";
-                    document.getElementById("errorMsg").style.display = "none";
+                    lockDocRef.set({ locked: !isLocked })
+                        .then(() => {
+                            console.log("Lock state updated successfully!");
+                            toggleModal(false);
+                            document.getElementById("passwordInput").value = "";
+                            document.getElementById("errorMsg").style.display = "none";
+                        })
+                        .catch((error) => {
+                            console.error("Error updating lock state: ", error);
+                        });
                 });
             } else {
                 document.getElementById("errorMsg").style.display = "block";
             }
         }
-        
+
+        // Function to update the lock button text and color
         function updateLockButton(isLocked) {
             const lockButton = document.getElementById("lockButton");
             lockButton.textContent = isLocked ? "Inactive" : "Active";
             lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
         }
-        
+
+        // Listen for changes in the lock state
         lockDocRef.onSnapshot((doc) => {
             if (doc.exists) {
                 updateLockButton(doc.data().locked);
             }
         });
-        
+
+        // Check lock state on page load
         window.onload = () => {
             lockDocRef.get().then((doc) => {
                 if (doc.exists && doc.data().locked) {
@@ -316,6 +329,23 @@
                 updateLockButton(doc.data()?.locked || false);
             });
         };
+
+        // Function to handle login
+        function checkLogin() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // Example of hardcoded credentials for demonstration purposes
+            const validUsername = "admin";
+            const validPassword = "password";
+
+            if (username === validUsername && password === validPassword) {
+                alert("Login successful!");
+                // Redirect or perform other actions after successful login
+            } else {
+                alert("Invalid username or password!");
+            }
+        }
     </script>
 </head>
 <body>
