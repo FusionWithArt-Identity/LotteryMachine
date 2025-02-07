@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(120deg, #87ceeb, #f0e68c, #ff7f50, #9370db);
+            background-size: 300% 300%;
+            animation: smoothBackgroundMovement 20s ease-in-out infinite;
+        }
+
+        .dynamic-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            z-index: -1;
+        }
+
+        @media print {
+            body {
+                display: none;
+            }
+        }
+
+        @keyframes smoothBackgroundMovement {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1, h2, p {
+            text-align: center;
+            color: white;
+        }
+
+        #main-header {
+            margin-bottom: 30px;
+            animation: horizontalOscillate 2s infinite alternate;
+            font-family: 'Garamond', serif;
+        }
+
+        #lockButton {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            padding: 10px 20px;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            background-color: cyan;
+        }
+
+        #login-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        #login-box {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: oscillate 3s infinite alternate;
+        }
+
+        #login-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        #login-box input {
+            width: 90%;
+            max-width: 300px;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            outline: none;
+            text-align: center;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        #login-button {
+            width: 90%;
+            max-width: 200px;
+            padding: 10px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        #login-button:hover {
+            background: linear-gradient(45deg, #3333ff, #ff00cc);
+        }
+    </style>
+
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+         apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+            projectId: "lotterymachine-by-mmd",
+            storageBucket: "lotterymachine-by-mmd.appspot.com",
+            messagingSenderId: "977277760191",
+            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const lockRef = doc(db, "site_settings", "lockState");
+
+    // ✅ **Ensure Site is Locked Across All Devices**
+    function checkIfLocked() {
+        onSnapshot(lockRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const isLocked = docSnap.data().locked;
+                updateLockButton(isLocked);
+
+                if (isLocked) {
+                    document.getElementById("login-box").style.display = "none";
+                    document.getElementById("main-header").textContent = "🔒 Site is Locked";
+                    sessionStorage.removeItem("username"); // **Force logout on all devices**
+                } else {
+                    document.getElementById("login-box").style.display = "block";
+                    document.getElementById("main-header").textContent = "Login to Your Account";
+                }
+            }
+        });
+    }
+
+    // ✅ **Lock the Site Globally**
+    async function toggleLock() {
+        const password = prompt("Enter Password:");
+        if (password !== "123") {
+            alert("Wrong password!");
+            return;
+        }
+
+        const docSnap = await getDoc(lockRef);
+        if (docSnap.exists()) {
+            const isLocked = docSnap.data().locked;
+            await updateDoc(lockRef, { locked: !isLocked });
+
+            if (!isLocked) {
+                sessionStorage.removeItem("username"); // **Immediately log out all users**
+            }
+
+            alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
+        }
+    }
+
+    function updateLockButton(isLocked) {
+        const lockButton = document.getElementById("lockButton");
+        if (lockButton) {
+            lockButton.textContent = isLocked ? "Inactive" : "Active";
+            lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
+        }
+    }
+
+    function checkLogin() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const correctUsername = "Mihir";
+        const correctPassword = "123";
+
+        if (username === correctUsername && password === correctPassword) {
+            sessionStorage.setItem("username", username);
+            setTimeout(() => {
+                window.location.href = "main.html";
+            }, 500);
+        } else {
+            alert("Invalid credentials. Try again.");
+        }
+    }
+
+    window.onload = () => {
+        checkIfLocked();
+        preventForward();
+    };
+
+    window.toggleLock = toggleLock;
+    window.checkLogin = checkLogin;
+
+    function preventForward() {
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+        };
+    }
+</script>
+
+</head>
+<body>
+    <div class="dynamic-background"></div>
+
+    <div id="login-page">
+        <h1 id="main-header">Login to Your Account</h1>
+        <div id="login-box">
+            <h2>Enter Credentials</h2>
+            <input type="text" id="username" placeholder="Username" required><br><br>
+            <input type="password" id="password" placeholder="Password" required><br><br>
+            <button id="login-button" onclick="checkLogin()">Log In</button>
+        </div>
+    </div>
+
+    <button id="lockButton" onclick="toggleLock()">Active</button>
+</body>
+</html>
