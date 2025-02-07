@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
-   <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -17,15 +17,15 @@
                 return;
             }
 
-          const firebaseConfig = {
-         apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
-            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
-            projectId: "lotterymachine-by-mmd",
-            storageBucket: "lotterymachine-by-mmd.appspot.com",
-            messagingSenderId: "977277760191",
-            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-    };
-
+            // ✅ Firebase Configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyAT...",
+                authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+                projectId: "lotterymachine-by-mmd",
+                storageBucket: "lotterymachine-by-mmd.appspot.com",
+                messagingSenderId: "977277760191",
+                appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+            };
 
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
@@ -79,7 +79,23 @@
                 `;
                 document.body.appendChild(logoutButton);
             };
+
+            // ✅ Fix Cursor Flickering Issue
+            const buttons = document.querySelectorAll("button");
+            buttons.forEach(button => {
+                button.addEventListener("mouseenter", () => {
+                    if (!button.disabled) {
+                        button.style.cursor = "pointer";
+                    } else {
+                        button.style.cursor = "not-allowed";
+                    }
+                });
+                button.addEventListener("mouseleave", () => {
+                    button.style.cursor = "default";
+                });
+            });
         });
+    </script>
     </script>
 </head>
 
