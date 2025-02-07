@@ -44,7 +44,7 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Prevent Backward & Forward Navigation Completely
+            // ✅ Strong Navigation Prevention
             function disableNavigation() {
                 history.pushState(null, null, location.href);
                 window.addEventListener("popstate", function () {
@@ -52,7 +52,7 @@
                 });
             }
 
-            // ✅ Disable Keyboard Shortcuts for Reload & Navigation
+            // ✅ Block Keyboard Shortcuts for Navigation & Refresh
             function disableShortcuts(event) {
                 if (["F5", "ArrowLeft", "ArrowRight"].includes(event.key) || 
                     (event.ctrlKey && ["r", "R", "[", "]"].includes(event.key)) ||
@@ -61,19 +61,31 @@
                 }
             }
 
-            // ✅ Hide Browser UI (Works in Some Kiosk Modes)
-            function hideUI() {
-                window.open(location.href, "_self");
+            // ✅ Invisible Overlay Hack (Blocks Clicks on Browser UI)
+            function addNavigationBlocker() {
+                const blocker = document.createElement("div");
+                blocker.style.position = "fixed";
+                blocker.style.top = "0";
+                blocker.style.left = "0";
+                blocker.style.width = "100vw";
+                blocker.style.height = "100vh";
+                blocker.style.zIndex = "9999";
+                blocker.style.background = "transparent";
+                blocker.style.pointerEvents = "none";
+                document.body.appendChild(blocker);
             }
 
             window.onload = function () {
                 disableNavigation();
+                setTimeout(disableNavigation, 0); // Reinforce prevention
+                
                 window.onbeforeunload = function (event) {
                     event.preventDefault();
                     event.returnValue = "";
                 };
+                
                 document.addEventListener("keydown", disableShortcuts);
-                setTimeout(hideUI, 500);
+                addNavigationBlocker();
                 
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
