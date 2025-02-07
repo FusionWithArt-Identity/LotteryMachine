@@ -6,19 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+ <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const username = sessionStorage.getItem("username");
+        document.addEventListener("DOMContentLoaded", function () {
+            const username = sessionStorage.getItem("username");
+            if (!username) {
+                window.location.replace("index.html");
+                return;
+            }
 
-        if (!username) {
-            window.location.replace("index.html"); // Redirect back to login if session is not found
-            return;
-        }
-
-        // ✅ Firestore Configuration
+           // ✅ Firestore Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
             authDomain: "lotterymachine-by-mmd.firebaseapp.com",
@@ -27,76 +26,63 @@
             messagingSenderId: "977277760191",
             appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
         };
-	    
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const lockRef = doc(db, "site_settings", "lockState");
 
-        // 🔒 **Listen for Lock Changes & Force Logout Globally**
-        onSnapshot(lockRef, (docSnap) => {
-            if (docSnap.exists() && docSnap.data().locked) {
-                sessionStorage.removeItem("username"); // **Clear session**
-                window.location.replace("index.html"); // **Redirect Immediately**
-            }
-        });
 
-        // ✅ **Keep Your Original Logout Function**
-        function logout() {
-            sessionStorage.removeItem("username"); // Clear session storage
-            window.location.replace("index.html"); // Redirect to login page
-        }
 
-        // ✅ **Prevent Back Navigation After Logout**
-        function preventBack() {
-            history.pushState(null, null, location.href);
-            window.onpopstate = function () {
-                history.go(1);
-            };
-        }
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const lockRef = doc(db, "site_settings", "lockState");
 
-        window.onload = function () {
-            preventBack();
+            // 🔒 Auto Logout if Site is Locked
+            onSnapshot(lockRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().locked) {
+                    sessionStorage.removeItem("username");
+                    window.location.replace("index.html");
+                }
+            });
 
-            const username = sessionStorage.getItem("username");
-            if (!username) {
+            // ✅ Logout Function
+            function logout() {
+                sessionStorage.removeItem("username");
                 window.location.replace("index.html");
-                return;
             }
 
-            // ✅ **Restore Your Exact Logout Button**
-            const logoutButton = document.createElement("button");
-            logoutButton.textContent = "Logout";
-            logoutButton.onclick = logout;
-            logoutButton.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                padding: 10px 15px;
-                background-color: red;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            `;
-            document.body.appendChild(logoutButton);
-        };
-    });
+            // ✅ Prevent Navigation
+            function preventNavigation() {
+                history.pushState(null, null, location.href);
+                window.onpopstate = function () {
+                    history.pushState(null, null, location.href);
+                };
+            }
 
-	function preventBack() {
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.pushState(null, null, location.href);
-        };
-    }
+            // ✅ Run on Page Load
+            window.onload = function () {
+                preventNavigation();
 
-    window.onload = function () {
-        preventBack();
-        window.addEventListener("load", preventBack);
-    };
-</script>
+                if (!sessionStorage.getItem("username")) {
+                    window.location.replace("index.html");
+                    return;
+                }
 
-
-	
+                // ✅ Create Logout Button
+                const logoutButton = document.createElement("button");
+                logoutButton.textContent = "Logout";
+                logoutButton.onclick = logout;
+                logoutButton.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    padding: 10px 15px;
+                    background-color: red;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                `;
+                document.body.appendChild(logoutButton);
+            };
+        });
+    </script>	
 </head>
 
 
