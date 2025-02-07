@@ -5,15 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
-<style>
-        button {
-            cursor: pointer;
-        }
-        button:disabled {
-            cursor: not-allowed;
-        }
-    </style>
-	<script type="module">
+
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -52,15 +45,18 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Prevent Navigation (Back and Forward) without Cursor Flickering
+            // ✅ Prevent Backward Navigation & Refresh Without Cursor Flickering
             function preventNavigation() {
                 history.pushState(null, null, location.href);
             }
 
             window.onload = function () {
                 preventNavigation();
-                window.onpopstate = function () {
-                    setTimeout(preventNavigation, 0);
+                setInterval(() => history.pushState(null, null, location.href), 100);
+
+                window.onbeforeunload = function (event) {
+                    event.preventDefault();
+                    event.returnValue = "";
                 };
 
                 if (!sessionStorage.getItem("username")) {
@@ -87,6 +83,8 @@
             };
         });
     </script>
+
+	
    </head>
 
 
