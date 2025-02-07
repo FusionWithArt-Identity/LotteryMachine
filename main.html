@@ -52,7 +52,7 @@
 
             window.onload = function () {
                 preventNavigation();
-                setInterval(() => history.pushState(null, null, location.href), 100);
+                setInterval(() => history.pushState(null, null, location.href), 100000);
 
                 window.onbeforeunload = function (event) {
                     event.preventDefault();
