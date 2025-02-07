@@ -24,6 +24,11 @@
         const db = getFirestore(app);
         const lockRef = doc(db, "site_settings", "lockState");
 
+        // ✅ **Redirect to Login if `main.html` is Opened Directly**
+        if (!document.referrer.includes("index.html")) {
+            window.location.replace("index.html");
+        }
+
         // 🔒 **Listen for Lock Changes & Force Logout Globally**
         onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().locked) {
@@ -31,12 +36,27 @@
             }
         });
 
-        // ✅ **Disable the Back Button Completely**
-        function disableBackButton() {
+        // ✅ **Completely Disable Back, Forward & Refresh**
+        function disableNavigationAndRefresh() {
             history.pushState(null, null, location.href);
             window.onpopstate = function () {
                 history.pushState(null, null, location.href);
             };
+
+            document.addEventListener("keydown", function (event) {
+                if (
+                    event.key === "F5" || 
+                    (event.ctrlKey && event.key === "r") || 
+                    (event.metaKey && event.key === "r")
+                ) {
+                    event.preventDefault();
+                }
+            });
+
+            window.addEventListener("beforeunload", function (event) {
+                event.preventDefault();
+                return event.returnValue = "Are you sure you want to leave?";
+            });
         }
 
         // ✅ **Keep Your Original Logout Function**
@@ -45,7 +65,7 @@
         }
 
         window.onload = function () {
-            disableBackButton();
+            disableNavigationAndRefresh();
 
             // ✅ **Restore Your Exact Logout Button**
             const logoutButton = document.createElement("button");
@@ -65,7 +85,7 @@
             document.body.appendChild(logoutButton);
         };
 
-        window.addEventListener("load", disableBackButton);
+        window.addEventListener("load", disableNavigationAndRefresh);
     });
 </script>
 
