@@ -11,15 +11,6 @@
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     document.addEventListener("DOMContentLoaded", function () {
-        const encodedUser = "TWloaXI=";  // Base64 of "Mihir"
-        const storedUser = sessionStorage.getItem("username");
-
-        if (!storedUser || btoa(atob(storedUser)) !== encodedUser) {
-            window.location.replace("index.html"); // Redirect back to login if invalid session
-            return;
-        }
-
-        // ✅ Firestore Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
             authDomain: "lotterymachine-by-mmd.firebaseapp.com",
@@ -36,33 +27,25 @@
         // 🔒 **Listen for Lock Changes & Force Logout Globally**
         onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().locked) {
-                sessionStorage.removeItem("username"); // **Clear session**
                 window.location.replace("index.html"); // **Redirect Immediately**
             }
         });
 
-        // ✅ **Keep Your Original Logout Function**
-        function logout() {
-            sessionStorage.removeItem("username"); // Clear session storage
-            window.location.replace("index.html"); // Redirect to login page
-        }
-
-        // ✅ **Fully Disable Back & Forward Navigation**
-        function disableNavigation() {
+        // ✅ **Disable the Back Button Completely**
+        function disableBackButton() {
             history.pushState(null, null, location.href);
             window.onpopstate = function () {
                 history.pushState(null, null, location.href);
             };
         }
 
-        window.onload = function () {
-            disableNavigation();
+        // ✅ **Keep Your Original Logout Function**
+        function logout() {
+            window.location.replace("index.html"); // Redirect to login page
+        }
 
-            // ✅ **Ensure User is Logged In**
-            if (!sessionStorage.getItem("username")) {
-                window.location.replace("index.html");
-                return;
-            }
+        window.onload = function () {
+            disableBackButton();
 
             // ✅ **Restore Your Exact Logout Button**
             const logoutButton = document.createElement("button");
@@ -82,7 +65,7 @@
             document.body.appendChild(logoutButton);
         };
 
-        window.addEventListener("load", disableNavigation);
+        window.addEventListener("load", disableBackButton);
     });
 </script>
 
