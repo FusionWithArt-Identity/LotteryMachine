@@ -13,7 +13,7 @@
             cursor: not-allowed;
         }
     </style>
-   <script type="module">
+	<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -52,17 +52,16 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Prevent Navigation (Back and Forward)
+            // ✅ Prevent Navigation (Back and Forward) without Cursor Flickering
             function preventNavigation() {
                 history.pushState(null, null, location.href);
-                window.onpopstate = function () {
-                    history.pushState(null, null, location.href);
-                };
             }
 
             window.onload = function () {
                 preventNavigation();
-                setInterval(preventNavigation, 100);
+                window.onpopstate = function () {
+                    setTimeout(preventNavigation, 0);
+                };
 
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
@@ -88,7 +87,7 @@
             };
         });
     </script>
-</head>
+   </head>
 
 
 <body>
