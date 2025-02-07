@@ -47,8 +47,8 @@
             window.location.replace("index.html"); // Redirect to login page
         }
 
-        // ✅ **Block Back & Forward Navigation**
-        function preventNavigation() {
+        // ✅ **Fully Disable Back & Forward Navigation**
+        function disableNavigation() {
             history.pushState(null, null, location.href);
             window.onpopstate = function () {
                 history.pushState(null, null, location.href);
@@ -56,7 +56,7 @@
         }
 
         window.onload = function () {
-            preventNavigation();
+            disableNavigation();
 
             // ✅ **Ensure User is Logged In**
             if (!sessionStorage.getItem("username")) {
@@ -82,9 +82,10 @@
             document.body.appendChild(logoutButton);
         };
 
-        window.addEventListener("load", preventNavigation);
+        window.addEventListener("load", disableNavigation);
     });
 </script>
+
 
 
 	
