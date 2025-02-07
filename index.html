@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
-         /* General Styles */
+       /* General Styles */
         body {
             margin: 0;
             padding: 0;
@@ -277,6 +277,10 @@
         const db = firebase.firestore();
         const lockDocRef = db.collection("globalState").doc("lockState");
         
+        function toggleModal(show) {
+            document.getElementById("customModal").style.display = show ? "block" : "none";
+        }
+        
         function toggleLock() {
             const password = document.getElementById("passwordInput").value;
             if (password === "123") {
@@ -326,7 +330,7 @@
         </div>
     </div>
     <button id="lockButton" onclick="toggleModal(true)">Active</button>
-    <div id="customModal">
+    <div id="customModal" style="display: none;">
         <div id="modalContent">
             <span style="pointer-events: auto;" onclick="toggleModal(false)">&times;</span>
             <p>Enter password to lock/unlock the site:</p>
