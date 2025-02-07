@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
-   <script type="module">
+       <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -44,16 +44,13 @@
                 window.location.replace("index.html");
             }
 
-            // ✅ Show Alert & Cancel Back/Forward Navigation
-            function blockNavigation(event) {
-                alert("Navigation Not Allowed!");
-                event.preventDefault();
-                history.pushState(null, "", location.href);
-            }
-
+            // ✅ Ensure Back/Forward Navigation Stays on Main Page
             function enforceNavigationBlock() {
                 history.pushState(null, "", location.href);
-                window.addEventListener("popstate", blockNavigation);
+                window.addEventListener("popstate", function (event) {
+                    alert("Navigation Not Allowed!");
+                    history.pushState(null, "", location.href);
+                });
             }
 
             // ✅ Block Keyboard Shortcuts for Navigation (Excluding F5)
