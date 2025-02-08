@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,95 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
-        authDomain: "lotterymachine-by-mmd.firebaseapp.com",
-        projectId: "lotterymachine-by-mmd",
-        storageBucket: "lotterymachine-by-mmd.appspot.com",
-        messagingSenderId: "977277760191",
-        appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+            projectId: "lotterymachine-by-mmd",
+            storageBucket: "lotterymachine-by-mmd.appspot.com",
+            messagingSenderId: "977277760191",
+            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const lockRef = doc(db, "site_settings", "lockState");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const lockRef = doc(db, "site_settings", "lockState");
 
-    // Get token from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
 
-    if (!token || token !== sessionStorage.getItem("authToken")) {
-        window.location.replace("index.html");
-    }
-
-    // Auto Logout if Site is Locked
-    onSnapshot(lockRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().locked) {
-            sessionStorage.removeItem("authToken");
+        if (!token || token !== sessionStorage.getItem("authToken")) {
             window.location.replace("index.html");
         }
-    });
 
-    let logoutTimeout;
+        // Auto Logout if Site is Locked
+        onSnapshot(lockRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().locked) {
+                sessionStorage.removeItem("authToken");
+                window.location.replace("index.html");
+            }
+        });
 
-    window.logout = function () {
-        document.getElementById("logoutModal").style.display = "flex";
-        logoutTimeout = setTimeout(() => {
+        let logoutTimeout;
+
+        window.logout = function () {
+            document.getElementById("logoutModal").style.display = "flex";
+            logoutTimeout = setTimeout(() => {
+                document.getElementById("logoutModal").style.display = "none";
+            }, 3000);
+        };
+
+        window.confirmLogout = function (choice) {
+            clearTimeout(logoutTimeout);
+            if (choice) {
+                sessionStorage.removeItem("authToken");
+                window.location.replace("index.html");
+            }
             document.getElementById("logoutModal").style.display = "none";
-        }, 3000);
-    };
+        };
 
-    window.confirmLogout = function (choice) {
-        clearTimeout(logoutTimeout);
-        if (choice) {
-            sessionStorage.removeItem("authToken");
-            window.location.replace("index.html");
-        }
-        document.getElementById("logoutModal").style.display = "none";
-    };
+        window.onload = function () {
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.onclick = logout;
+            logoutButton.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                background-color: red;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            document.body.appendChild(logoutButton);
+        };
 
-    window.onload = function () {
-        const logoutButton = document.createElement("button");
-        logoutButton.textContent = "Logout";
-        logoutButton.onclick = logout;
-        logoutButton.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        `;
-        document.body.appendChild(logoutButton);
-    };
+        // Detect refresh attempt and ask for confirmation
+        window.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "Are you sure you want to refresh the page?";
+        });
+    </script>
 
-    // Detect refresh attempt and ask for confirmation
-    window.addEventListener("beforeunload", function (event) {
-        event.preventDefault();
-        event.returnValue = "Are you sure you want to refresh the page?";
-    });
-</script>
-
-<!-- Logout Confirmation Modal -->
-<div id="logoutModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 999999;">
-    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
-        <p>Are You Sure Want to Quit/ Exit?</p>
-        <button onclick="window.confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
-        <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 999999;">
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
+            <p>Are You Sure Want to Quit/ Exit?</p>
+            <button onclick="window.confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
+            <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
+        </div>
     </div>
-</div>
-
 	
 </head>
 
-
+	
 <body>
    <head>
     <meta charset="UTF-8">
