@@ -35,12 +35,14 @@
             }
         }
 
+        /* Smooth Background Movement */
         @keyframes smoothBackgroundMovement {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        /* Header Text Styling */
         h1, h2, p {
             text-align: center;
             color: white;
@@ -52,6 +54,7 @@
             font-family: 'Garamond', serif;
         }
 
+        /* Lock Button Styling */
         #lockButton {
             position: fixed;
             top: 20px;
@@ -66,6 +69,7 @@
             background-color: cyan;
         }
 
+        /* Login Page Styling */
         #login-page {
             display: flex;
             flex-direction: column;
@@ -124,9 +128,124 @@
         #login-button:hover {
             background: linear-gradient(45deg, #3333ff, #ff00cc);
         }
+
+        /* Animations */
+        @keyframes horizontalOscillate {
+            from { transform: translateX(-10px); }
+            to { transform: translateX(10px); }
+        }
+
+        @keyframes oscillate {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            #login-box {
+                padding: 15px;
+            }
+
+            #login-box h2 {
+                font-size: 1.25rem;
+            }
+
+            #login-box input {
+                font-size: 0.9rem;
+            }
+
+            #login-button {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Disable Clicking Globally */
+        .modal-active * {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Allow Clicking for Specific Functional Elements */
+        .modal-active input,
+        .modal-active button,
+        .modal-active #lockButton,
+        .modal-active #customModal,
+        .modal-active #customModal * {
+            pointer-events: auto;
+        }
+
+        /* Modal Window Styling */
+        #customModal {
+            display: none;
+            position: fixed;
+            z-index: 9998;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+        }
+
+        #modalContent {
+            background-color: cyan;
+            margin: 0;
+            padding: 20px;
+            width: 300px;
+            border-radius: 8px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        #modalContent p {
+            color: black;
+        }
+
+        #modalContent span {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        #modalContent input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        #submitBtn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        #errorMsg {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 
- <script type="module">
+     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -284,10 +403,7 @@
         sessionStorage.clear();
     });
 
-</script>
-
-
- 
+    </script>
 </head>
 <body>
     <div class="dynamic-background"></div>
@@ -305,3 +421,5 @@
     <button id="lockButton" onclick="toggleLock()">Active</button>
 </body>
 </html>
+
+
