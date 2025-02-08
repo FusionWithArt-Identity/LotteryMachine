@@ -126,98 +126,154 @@
         }
     </style>
 
-   <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
-            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
-            projectId: "lotterymachine-by-mmd",
-            storageBucket: "lotterymachine-by-mmd.appspot.com",
-            messagingSenderId: "977277760191",
-            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+        authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+        projectId: "lotterymachine-by-mmd",
+        storageBucket: "lotterymachine-by-mmd.appspot.com",
+        messagingSenderId: "977277760191",
+        appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const lockRef = doc(db, "site_settings", "lockState");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const lockRef = doc(db, "site_settings", "lockState");
 
-        function checkIfLocked() {
-            onSnapshot(lockRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const isLocked = docSnap.data().locked;
-                    updateLockButton(isLocked);
-
-                    if (isLocked) {
-                        document.getElementById("login-box").style.display = "none";
-                        document.getElementById("main-header").textContent = "🔒 Site is Locked";
-                    } else {
-                        document.getElementById("login-box").style.display = "block";
-                        document.getElementById("main-header").textContent = "Login to Your Account";
-                    }
-                }
-            });
-        }
-
-        async function toggleLock() {
-            const password = prompt("Enter Password:");
-            if (password !== "123") {
-                alert("Wrong password!");
-                return;
-            }
-
-            const docSnap = await getDoc(lockRef);
+    function checkIfLocked() {
+        onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists()) {
                 const isLocked = docSnap.data().locked;
-                await updateDoc(lockRef, { locked: !isLocked });
-                alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
+                updateLockButton(isLocked);
+
+                if (isLocked) {
+                    document.getElementById("login-box").style.display = "none";
+                    document.getElementById("main-header").textContent = "🔒 Site is Locked";
+                } else {
+                    document.getElementById("login-box").style.display = "block";
+                    document.getElementById("main-header").textContent = "Login to Your Account";
+                }
             }
+        });
+    }
+
+    async function toggleLock() {
+        const password = prompt("Enter Password:");
+        if (password !== "123") {
+            alert("Wrong password!");
+            return;
         }
 
-        function updateLockButton(isLocked) {
-            const lockButton = document.getElementById("lockButton");
-            if (lockButton) {
-                lockButton.textContent = isLocked ? "Inactive" : "Active";
-                lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
-            }
+        const docSnap = await getDoc(lockRef);
+        if (docSnap.exists()) {
+            const isLocked = docSnap.data().locked;
+            await updateDoc(lockRef, { locked: !isLocked });
+            alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
         }
+    }
 
-        function checkLogin() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
+    function updateLockButton(isLocked) {
+        const lockButton = document.getElementById("lockButton");
+        if (lockButton) {
+            lockButton.textContent = isLocked ? "Inactive" : "Active";
+            lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
+        }
+    }
 
-            const correctUsername = "Mihir";
-            const correctPassword = "123";
+    function checkLogin() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
 
-            if (username === correctUsername && password === correctPassword) {
-                const token = Math.random().toString(36).substring(2);
-                sessionStorage.setItem("authToken", token);
-                sessionStorage.setItem("closeLogin", "true");  // 🔥 Store flag to close the login page later
+        const correctUsername = "Mihir";
+        const correctPassword = "123";
 
-                const newTab = window.open(`main.html?token=${token}`, "_blank");
+        if (username === correctUsername && password === correctPassword) {
+            const token = Math.random().toString(36).substring(2);
+            sessionStorage.setItem("authToken", token);
+            sessionStorage.setItem("closeLogin", "true");  // 🔥 Store flag to close the login page later
 
-                setTimeout(() => {
-                    window.close(); // Attempt to close immediately
-                }, 1000);
+            const newTab = window.open(`main.html?token=${token}`, "_blank");
+
+            setTimeout(() => {
+                window.close(); // Attempt to close immediately
+            }, 1000);
+        } else {
+            alert("Invalid credentials. Try again.");
+        }
+    }
+
+    window.onload = () => {
+        checkIfLocked();
+
+        // 🔥 Auto-close if redirected back after login
+        if (sessionStorage.getItem("closeLogin") === "true") {
+            sessionStorage.removeItem("closeLogin"); // Remove the flag
+            window.close(); // Close the login page
+        }
+    };
+
+    window.toggleLock = toggleLock;
+    window.checkLogin = checkLogin;
+
+    // 🚫 Prevent "Save Page As" (Ctrl+S / Cmd+S)
+    document.addEventListener("keydown", function (event) {
+        if ((event.ctrlKey || event.metaKey) && (event.key === "s" || event.key === "S")) {
+            event.preventDefault();
+            alert("Saving this page is disabled!");
+        }
+    });
+
+    // 🚫 Disable Right-Click
+    document.addEventListener("contextmenu", function (event) {
+        event.preventDefault();
+        alert("Right-click is disabled!");
+    });
+
+    // 🚫 Block Downloads
+    document.addEventListener("click", function (event) {
+        if (event.target.tagName === "A" && event.target.hasAttribute("download")) {
+            event.preventDefault();
+            alert("File downloads are not allowed!");
+        }
+    }, true);
+
+    // 🚫 Block Dragging Images (Prevents Image Download)
+    document.addEventListener("dragstart", function (event) {
+        if (event.target.tagName === "IMG") {
+            event.preventDefault();
+            alert("Downloading images is not allowed!");
+        }
+    });
+
+    // 🚫 Detect Developer Tools (DevTools)
+    (function () {
+        let devtools = { open: false, orientation: null };
+        const threshold = 160;
+
+        setInterval(function () {
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+            if (widthThreshold || heightThreshold) {
+                devtools.open = true;
+                alert("Developer tools detected! Access denied.");
+                window.location.reload();
             } else {
-                alert("Invalid credentials. Try again.");
+                devtools.open = false;
             }
-        }
+        }, 500);
+    })();
 
-        window.onload = () => {
-            checkIfLocked();
+    // 🚫 Clear Session Storage on Unload (Prevents Saved Data)
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.clear();
+    });
 
-            // 🔥 Auto-close if redirected back after login
-            if (sessionStorage.getItem("closeLogin") === "true") {
-                sessionStorage.removeItem("closeLogin"); // Remove the flag
-                window.close(); // Close the login page
-            }
-        };
+</script>
 
-        window.toggleLock = toggleLock;
-        window.checkLogin = checkLogin;
-    </script>
  
 </head>
 <body>
