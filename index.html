@@ -128,7 +128,6 @@
 
  <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -141,7 +140,6 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
         const lockRef = doc(db, "site_settings", "lockState");
 
@@ -186,16 +184,22 @@
         }
 
         function checkLogin() {
-            const email = document.getElementById("email").value;
+            const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                    window.open("main.html", "_blank"); // Open main page in new tab
-                })
-                .catch(() => {
-                    alert("Invalid credentials. Try again.");
-                });
+            const correctUsername = "Mihir";
+            const correctPassword = "123";
+
+            if (username === correctUsername && password === correctPassword) {
+                // Generate a temporary token and pass it to the new tab
+                const token = Math.random().toString(36).substring(2);
+                sessionStorage.setItem("authToken", token);
+
+                // Open main.html in a new tab with the token
+                window.open(`main.html?token=${token}`, "_blank");
+            } else {
+                alert("Invalid credentials. Try again.");
+            }
         }
 
         window.onload = () => {
