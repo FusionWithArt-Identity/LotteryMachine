@@ -126,104 +126,111 @@
         }
     </style>
 
-   <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
-            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
-            projectId: "lotterymachine-by-mmd",
-            storageBucket: "lotterymachine-by-mmd.appspot.com",
-            messagingSenderId: "977277760191",
-            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
+        authDomain: "lotterymachine-by-mmd.firebaseapp.com",
+        projectId: "lotterymachine-by-mmd",
+        storageBucket: "lotterymachine-by-mmd.appspot.com",
+        messagingSenderId: "977277760191",
+        appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const lockRef = doc(db, "site_settings", "lockState");
-        
-        const encryptedPass = "MTIz"; // Base64 for "123"
-        const encryptedUser = "TWl oaXI="; // Base64 for "Mihir"
-        
-        function decodeBase64(str) {
-            return atob(str);
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const lockRef = doc(db, "site_settings", "lockState");
 
-        function checkIfLocked() {
-            onSnapshot(lockRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const isLocked = docSnap.data().locked;
-                    updateLockButton(isLocked);
-                    document.getElementById("login-box").style.display = isLocked ? "none" : "block";
-                }
-            });
-        }
+    const encryptedPass = "MTIz"; // Base64 for "123"
+    const encryptedUser = "TWl oaXI="; // Base64 for "Mihir"
 
-        async function toggleLock() {
-            const password = prompt("Enter Password:");
-            if (password !== decodeBase64(encryptedPass)) {
-                alert("Wrong password!");
-                return;
-            }
-            
-            const docSnap = await getDoc(lockRef);
+    function decodeBase64(str) {
+        return atob(str);
+    }
+
+    function checkIfLocked() {
+        onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists()) {
                 const isLocked = docSnap.data().locked;
-                await updateDoc(lockRef, { locked: !isLocked });
-                alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked!");
+                updateLockButton(isLocked);
+                document.getElementById("login-box").style.display = isLocked ? "none" : "block";
             }
+        });
+    }
+
+    async function toggleLock() {
+        const password = prompt("Enter Password:");
+        if (password !== decodeBase64(encryptedPass)) {
+            alert("Wrong password!");
+            return;
         }
 
-        function updateLockButton(isLocked) {
-            const lockButton = document.getElementById("lockButton");
-            lockButton.textContent = isLocked ? "Inactive" : "Active";
-            lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
+        const docSnap = await getDoc(lockRef);
+        if (docSnap.exists()) {
+            const isLocked = docSnap.data().locked;
+            await updateDoc(lockRef, { locked: !isLocked });
+            alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked!");
         }
+    }
 
-        function checkLogin() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            if (username === decodeBase64(encryptedUser) && password === decodeBase64(encryptedPass)) {
-                sessionStorage.setItem("loggedIn", "true");
-                window.location.href = "main.html";
-            } else {
-                alert("Invalid credentials. Try again.");
-            }
+    function updateLockButton(isLocked) {
+        const lockButton = document.getElementById("lockButton");
+        lockButton.textContent = isLocked ? "Inactive" : "Active";
+        lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
+    }
+
+    function checkLogin() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        if (username === decodeBase64(encryptedUser) && password === decodeBase64(encryptedPass)) {
+            sessionStorage.setItem("loggedIn", "true");
+            window.location.href = "main.html";
+        } else {
+            alert("Invalid credentials. Try again.");
         }
+    }
 
-        function preventNavigation() {
+    function preventNavigation() {
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
             history.pushState(null, null, location.href);
-            window.onpopstate = function () {
-                history.pushState(null, null, location.href);
-            };
-        }
-
-        function disableSaveAndDownload() {
-            document.addEventListener('contextmenu', event => event.preventDefault());
-            document.addEventListener('keydown', function (event) {
-                if (event.ctrlKey && (event.key === 's' || event.key === 'u' || event.key === 'p')) {
-                    event.preventDefault();
-                }
-            });
-        }
-
-        function enforceLogin() {
-            if (!sessionStorage.getItem("loggedIn")) {
-                window.location.href = "index.html";
-            }
-        }
-
-        window.onload = () => {
-            checkIfLocked();
-            preventNavigation();
-            disableSaveAndDownload();
-            enforceLogin();
         };
+    }
 
-        window.toggleLock = toggleLock;
-        window.checkLogin = checkLogin;
-    </script>
+    function disableSaveAndDownload() {
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && (event.key === 's' || event.key === 'u' || event.key === 'p')) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    function enforceLogin() {
+        const isLoggedIn = sessionStorage.getItem("loggedIn") === "true";
+        const isMainPage = window.location.pathname.includes("main.html");
+        const isLoginPage = window.location.pathname.includes("index.html");
+
+        if (!isLoggedIn && isMainPage) {
+            window.location.href = "index.html";
+        } else if (isLoggedIn && isLoginPage) {
+            window.location.href = "main.html";
+        }
+    }
+
+    window.onload = () => {
+        checkIfLocked();
+        preventNavigation();
+        disableSaveAndDownload();
+        enforceLogin();
+    };
+
+    window.toggleLock = toggleLock;
+    window.checkLogin = checkLogin;
+</script>
+
 </head>
 <body>
     <div class="dynamic-background"></div>
