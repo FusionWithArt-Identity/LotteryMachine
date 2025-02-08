@@ -27,20 +27,20 @@
         const token = urlParams.get("token");
 
         if (!token || token !== sessionStorage.getItem("authToken")) {
-            window.location.replace("index.html");
+            window.location.href = "index.html";
         }
 
         // Auto Logout if Site is Locked
         onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().locked) {
                 sessionStorage.removeItem("authToken");
-                window.location.replace("index.html");
+                window.location.href = "index.html";
             }
         });
 
         function logout() {
             sessionStorage.removeItem("authToken");
-            window.location.replace("index.html");
+            window.location.href = "index.html"; // Fixed redirection issue
         }
 
         window.onload = function () {
@@ -60,7 +60,8 @@
             `;
             document.body.appendChild(logoutButton);
         };
-    </script>
+</script>
+
 
 	
 </head>
