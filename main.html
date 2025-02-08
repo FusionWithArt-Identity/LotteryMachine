@@ -47,7 +47,7 @@
             const logoutButton = document.createElement("button");
             logoutButton.textContent = "Logout";
             logoutButton.onclick = logout;
-            logoutButton.style.cssText = 
+            logoutButton.style.cssText = `
                 position: fixed;
                 top: 10px;
                 right: 10px;
@@ -57,11 +57,10 @@
                 border: none;
                 border-radius: 5px;
                 cursor: pointer;
-            ;
+            `;
             document.body.appendChild(logoutButton);
         };
     </script>
-
 
 	
 </head>
