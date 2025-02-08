@@ -185,6 +185,7 @@
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             if (username === decodeBase64(encryptedUser) && password === decodeBase64(encryptedPass)) {
+                sessionStorage.setItem("loggedIn", "true");
                 window.location.href = "main.html";
             } else {
                 alert("Invalid credentials. Try again.");
@@ -207,23 +208,22 @@
             });
         }
 
-        function makePageUnreadable() {
-            window.onbeforeunload = function () {
-                document.body.innerHTML = "<h1>Content Unavailable</h1>";
-            };
+        function enforceLogin() {
+            if (!sessionStorage.getItem("loggedIn")) {
+                window.location.href = "index.html";
+            }
         }
 
         window.onload = () => {
             checkIfLocked();
             preventNavigation();
             disableSaveAndDownload();
-            makePageUnreadable();
+            enforceLogin();
         };
 
         window.toggleLock = toggleLock;
         window.checkLogin = checkLogin;
     </script>
-
 </head>
 <body>
     <div class="dynamic-background"></div>
