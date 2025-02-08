@@ -39,11 +39,20 @@
         }
     });
 
+    let modalTimeout;
+    
     window.logout = function () {
-        document.getElementById("logoutModal").style.display = "flex";
+        const modal = document.getElementById("logoutModal");
+        modal.style.display = "flex";
+        
+        // Auto close modal after 3 seconds if no interaction
+        modalTimeout = setTimeout(() => {
+            modal.style.display = "none";
+        }, 3000);
     };
 
     window.confirmLogout = function (choice) {
+        clearTimeout(modalTimeout); // Prevent auto-closing if a button is clicked
         if (choice) {
             sessionStorage.removeItem("authToken");
             window.location.replace("index.html");
@@ -84,7 +93,6 @@
         <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
     </div>
 </div>
-
 
 	
 </head>
