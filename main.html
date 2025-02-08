@@ -39,20 +39,17 @@
         }
     });
 
-    let modalTimeout;
-    
+    let logoutTimeout;
+
     window.logout = function () {
-        const modal = document.getElementById("logoutModal");
-        modal.style.display = "flex";
-        
-        // Auto close modal after 3 seconds if no interaction
-        modalTimeout = setTimeout(() => {
-            modal.style.display = "none";
+        document.getElementById("logoutModal").style.display = "flex";
+        logoutTimeout = setTimeout(() => {
+            document.getElementById("logoutModal").style.display = "none";
         }, 3000);
     };
 
     window.confirmLogout = function (choice) {
-        clearTimeout(modalTimeout); // Prevent auto-closing if a button is clicked
+        clearTimeout(logoutTimeout);
         if (choice) {
             sessionStorage.removeItem("authToken");
             window.location.replace("index.html");
