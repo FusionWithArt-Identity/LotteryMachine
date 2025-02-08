@@ -126,7 +126,7 @@
         }
     </style>
 
-  <script type="module">
+ <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -204,83 +204,6 @@
 
         window.toggleLock = toggleLock;
         window.checkLogin = checkLogin;
-    </script>
-</body>
-</html>
-2️⃣ Update main.html (Main Page)
-Only allows authenticated users.
-Logs out automatically if the session expires.
-html
-Copy
-Edit
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
-</head>
-<body>
-    <h1>Welcome to the Main Page</h1>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
-            authDomain: "lotterymachine-by-mmd.firebaseapp.com",
-            projectId: "lotterymachine-by-mmd",
-            storageBucket: "lotterymachine-by-mmd.appspot.com",
-            messagingSenderId: "977277760191",
-            appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const lockRef = doc(db, "site_settings", "lockState");
-
-        // Check if user is authenticated
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.replace("index.html");
-            }
-        });
-
-        // Auto Logout if Site is Locked
-        onSnapshot(lockRef, (docSnap) => {
-            if (docSnap.exists() && docSnap.data().locked) {
-                signOut(auth).then(() => {
-                    window.location.replace("index.html");
-                });
-            }
-        });
-
-        function logout() {
-            signOut(auth).then(() => {
-                window.location.replace("index.html");
-            });
-        }
-
-        window.onload = function () {
-            const logoutButton = document.createElement("button");
-            logoutButton.textContent = "Logout";
-            logoutButton.onclick = logout;
-            logoutButton.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                padding: 10px 15px;
-                background-color: red;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            `;
-            document.body.appendChild(logoutButton);
-        };
     </script>
 </head>
 <body>
