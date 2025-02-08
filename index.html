@@ -126,7 +126,7 @@
         }
     </style>
 
- <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -195,8 +195,13 @@
                 const token = Math.random().toString(36).substring(2);
                 sessionStorage.setItem("authToken", token);
 
-                // Open main.html in a new tab with the token
-                window.open(`main.html?token=${token}`, "_blank");
+                // Open main.html in a new tab
+                const newTab = window.open(`main.html?token=${token}`, "_blank");
+
+                // Close login page after a short delay (ensures new tab opens)
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
             } else {
                 alert("Invalid credentials. Try again.");
             }
@@ -209,6 +214,8 @@
         window.toggleLock = toggleLock;
         window.checkLogin = checkLogin;
     </script>
+
+ 
 </head>
 <body>
     <div class="dynamic-background"></div>
