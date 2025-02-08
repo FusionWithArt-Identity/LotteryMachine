@@ -28,24 +28,37 @@
         const token = urlParams.get("token");
 
         if (!token || token !== sessionStorage.getItem("authToken")) {
-            window.location.assign("index.html"); // Ensure a proper redirect
+            window.location.assign("index.html"); // Ensure proper redirect
         }
 
         // Auto Logout if Site is Locked
         onSnapshot(lockRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().locked) {
                 sessionStorage.removeItem("authToken");
-                setTimeout(() => {
-                    window.location.assign("index.html"); // Force redirection
-                }, 100); 
+                redirectToIndex();
             }
         });
 
         function logout() {
             sessionStorage.removeItem("authToken");
-            setTimeout(() => {
-                window.location.assign("index.html"); // Ensures proper page navigation
-            }, 100); 
+            redirectToIndex();
+        }
+
+        function redirectToIndex() {
+            // Check if the original login tab (index.html) was stored
+            const loginTab = sessionStorage.getItem("loginTab");
+
+            if (loginTab) {
+                // Try to focus on the stored login tab instead of opening a new one
+                try {
+                    window.open(loginTab, "_self");
+                } catch (e) {
+                    window.location.assign("index.html"); // Fallback if reference is lost
+                }
+            } else {
+                // If no stored tab, open index.html in the same tab
+                window.location.assign("index.html");
+            }
         }
 
         window.onload = function () {
@@ -66,6 +79,7 @@
             document.body.appendChild(logoutButton);
         };
 </script>
+
 
 	
 </head>
