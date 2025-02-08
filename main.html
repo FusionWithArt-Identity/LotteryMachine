@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
- <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -39,17 +39,17 @@
         }
     });
 
-    function logout() {
-        document.getElementById("logoutModal").style.display = "block";
-    }
+    window.logout = function () {
+        document.getElementById("logoutModal").style.display = "flex";
+    };
 
-    function confirmLogout(choice) {
+    window.confirmLogout = function (choice) {
         if (choice) {
             sessionStorage.removeItem("authToken");
             window.location.replace("index.html");
         }
         document.getElementById("logoutModal").style.display = "none";
-    }
+    };
 
     window.onload = function () {
         const logoutButton = document.createElement("button");
@@ -77,11 +77,14 @@
 </script>
 
 <!-- Logout Confirmation Modal -->
-<div id="logoutModal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center; z-index: 999999;">
-    <p>Are You Sure Want to Quit/ Exit?</p>
-    <button onclick="confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
-    <button onclick="confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
+<div id="logoutModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 999999;">
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
+        <p>Are You Sure Want to Quit/ Exit?</p>
+        <button onclick="window.confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
+        <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
+    </div>
 </div>
+
 
 	
 </head>
