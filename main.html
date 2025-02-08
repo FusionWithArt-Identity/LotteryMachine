@@ -16,12 +16,11 @@
                 return;
             }
 
-            // ✅ Firebase Configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyATv2F6CKX7jnvQa8XayHj12c2qa-2ECcg",
                 authDomain: "lotterymachine-by-mmd.firebaseapp.com",
                 projectId: "lotterymachine-by-mmd",
-                storageBucket: "lotterymachine-by-mmd.appspot.com",
+                storageBucket: "lotterymachine-by-mmd",
                 messagingSenderId: "977277760191",
                 appId: "1:977277760191:web:f55cd69cc7b4ee91504c0a"
             };
@@ -30,7 +29,6 @@
             const db = getFirestore(app);
             const lockRef = doc(db, "site_settings", "lockState");
 
-            // 🔒 Auto Logout if Site is Locked
             onSnapshot(lockRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().locked) {
                     sessionStorage.removeItem("username");
@@ -38,13 +36,11 @@
                 }
             });
 
-            // ✅ Logout Function
             function logout() {
                 sessionStorage.removeItem("username");
                 window.location.replace("index.html");
             }
 
-            // ✅ Show Alert & Cancel Back/Forward Navigation
             function blockNavigation(event) {
                 alert("Navigation Not Allowed!");
                 event.preventDefault();
@@ -56,7 +52,6 @@
                 window.addEventListener("popstate", blockNavigation);
             }
 
-            // ✅ Block Keyboard Shortcuts for Navigation (Excluding F5)
             function disableShortcuts(event) {
                 if (["ArrowLeft", "ArrowRight"].includes(event.key) || 
                     (event.ctrlKey && ["[", "]"].includes(event.key)) ||
@@ -75,13 +70,12 @@
                 };
                 
                 document.addEventListener("keydown", disableShortcuts);
-                
+
                 if (!sessionStorage.getItem("username")) {
                     window.location.replace("index.html");
                     return;
                 }
 
-                // ✅ Create Logout Button
                 const logoutButton = document.createElement("button");
                 logoutButton.textContent = "Logout";
                 logoutButton.onclick = logout;
@@ -100,6 +94,7 @@
             };
         });
     </script>
+
     </head>
 
 
