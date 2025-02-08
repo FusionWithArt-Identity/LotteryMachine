@@ -67,7 +67,7 @@
         }
 
         /* Modal Window Styling */
-        #customModal {
+        #customModal, #alertModal {
             display: none;
             position: fixed;
             z-index: 9998;
@@ -78,9 +78,8 @@
             background-color: rgba(0,0,0,0.3);
         }
 
-        #modalContent {
+        #modalContent, #alertContent {
             background-color: cyan;
-            margin: 0;
             padding: 20px;
             width: 300px;
             border-radius: 8px;
@@ -88,7 +87,6 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 9998;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -96,12 +94,11 @@
             padding-top: 40px;
         }
 
-        /* Modal Header Text Color */
-        #modalContent p {
-            color: black;  /* Set text color to black for the header */
+        #modalContent p, #alertContent p {
+            color: black;
         }
 
-        #modalContent span {
+        #modalContent span, #alertContent span {
             position: absolute;
             right: 20px;
             top: 10px;
@@ -118,8 +115,8 @@
 
         #submitBtn {
             padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
+            background-color: orange;
+            color: black;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -128,7 +125,7 @@
         }
 
         #errorMsg {
-            color: red;
+            color: red !important;
             margin-top: 10px;
             display: none;
         }
@@ -253,6 +250,17 @@
         const db = getFirestore(app);
         const lockRef = doc(db, "site_settings", "lockState");
 
+        function showAlertModal(message) {
+            const alertModal = document.getElementById("alertModal");
+            const alertContent = document.getElementById("alertContent");
+            alertContent.querySelector("p").textContent = message;
+            alertModal.style.display = "block";
+
+            setTimeout(() => {
+                alertModal.style.display = "none";
+            }, 2000);
+        }
+
         function checkIfLocked() {
             onSnapshot(lockRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -273,16 +281,27 @@
         function toggleLock() {
             const modal = document.getElementById("customModal");
             modal.style.display = "block";
+            document.getElementById("modalPassword").value = ""; // Clear the password input field
+            document.getElementById("errorMsg").style.display = "none"; // Hide the error message
         }
 
         function closeModal() {
             const modal = document.getElementById("customModal");
             modal.style.display = "none";
+            document.getElementById("modalPassword").value = ""; // Clear the password input field
+            document.getElementById("errorMsg").style.display = "none"; // Hide the error message
         }
 
         async function submitPassword() {
             const password = document.getElementById("modalPassword").value;
+            if (!password) {
+                document.getElementById("errorMsg").textContent = "Password cannot be empty!";
+                document.getElementById("errorMsg").style.display = "block";
+                return;
+            }
+
             if (password !== "123") {
+                document.getElementById("errorMsg").textContent = "Wrong password!";
                 document.getElementById("errorMsg").style.display = "block";
                 return;
             }
@@ -291,7 +310,7 @@
             if (docSnap.exists()) {
                 const isLocked = docSnap.data().locked;
                 await updateDoc(lockRef, { locked: !isLocked });
-                alert(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
+                showAlertModal(isLocked ? "🔓 Site Unlocked!" : "🔒 Site Locked for All Users!");
                 closeModal();
             }
         }
@@ -322,7 +341,7 @@
                     window.close(); // Attempt to close immediately
                 }, 1000);
             } else {
-                alert("Invalid credentials. Try again.");
+                showAlertModal("Invalid credentials. Try again.");
             }
         }
 
@@ -344,14 +363,14 @@
         // 🚫 Disable Right-Click
         document.addEventListener("contextmenu", function (event) {
             event.preventDefault();
-            alert("Right-click is disabled!");
+            showAlertModal("Right-click is disabled!");
         });
 
         // 🚫 Disable "Save Page As" (Ctrl+S / Cmd+S)
         document.addEventListener("keydown", function (event) {
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
                 event.preventDefault();
-                alert("Saving this page is disabled!");
+                showAlertModal("Saving this page is disabled!");
             }
         });
 
@@ -363,7 +382,7 @@
                 (event.ctrlKey && event.keyCode === 85) // Ctrl+U (View Source)
             ) {
                 event.preventDefault();
-                alert("Inspecting is disabled!");
+                showAlertModal("Inspecting is disabled!");
             }
         });
 
@@ -371,7 +390,7 @@
         document.addEventListener("click", function (event) {
             if (event.target.tagName === "A" && event.target.hasAttribute("download")) {
                 event.preventDefault();
-                alert("Downloading is blocked!");
+                showAlertModal("Downloading is blocked!");
             }
         }, true);
 
@@ -379,7 +398,7 @@
         document.addEventListener("dragstart", function (event) {
             if (event.target.tagName === "IMG") {
                 event.preventDefault();
-                alert("Downloading images is not allowed!");
+                showAlertModal("Downloading images is not allowed!");
             }
         });
 
@@ -394,7 +413,7 @@
 
                 if (widthThreshold || heightThreshold) {
                     devtools.open = true;
-                    alert("Developer tools detected! Redirecting...");
+                    showAlertModal("Developer tools detected! Redirecting...");
                     window.location.href = "https://google.com"; // Redirect user
                 } else {
                     devtools.open = false;
@@ -427,10 +446,18 @@
     <div id="customModal">
         <div id="modalContent">
             <span onclick="closeModal()">&times;</span>
-            <p>Enter Password</p>
+            <p><i>Enter ADMIN Password to Lock Entire Page --</i></p>
             <input type="password" id="modalPassword" placeholder="Password">
             <button id="submitBtn" onclick="submitPassword()">Submit</button>
             <p id="errorMsg" style="display: none;">Wrong password!</p>
+        </div>
+    </div>
+
+    <!-- Modal for Alerts -->
+    <div id="alertModal">
+        <div id="alertContent">
+            <span onclick="document.getElementById('alertModal').style.display = 'none'">&times;</span>
+            <p></p>
         </div>
     </div>
 </body>
