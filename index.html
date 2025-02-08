@@ -126,7 +126,7 @@
         }
     </style>
 
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -218,29 +218,41 @@
     window.toggleLock = toggleLock;
     window.checkLogin = checkLogin;
 
-    // 🚫 Prevent "Save Page As" (Ctrl+S / Cmd+S)
-    document.addEventListener("keydown", function (event) {
-        if ((event.ctrlKey || event.metaKey) && (event.key === "s" || event.key === "S")) {
-            event.preventDefault();
-            alert("Saving this page is disabled!");
-        }
-    });
-
     // 🚫 Disable Right-Click
     document.addEventListener("contextmenu", function (event) {
         event.preventDefault();
         alert("Right-click is disabled!");
     });
 
+    // 🚫 Disable "Save Page As" (Ctrl+S / Cmd+S)
+    document.addEventListener("keydown", function (event) {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+            event.preventDefault();
+            alert("Saving this page is disabled!");
+        }
+    });
+
+    // 🚫 Disable F12, Ctrl+Shift+I, Ctrl+U (Inspect Element)
+    document.addEventListener("keydown", function (event) {
+        if (
+            event.keyCode === 123 || // F12
+            (event.ctrlKey && event.shiftKey && event.keyCode === 73) || // Ctrl+Shift+I
+            (event.ctrlKey && event.keyCode === 85) // Ctrl+U (View Source)
+        ) {
+            event.preventDefault();
+            alert("Inspecting is disabled!");
+        }
+    });
+
     // 🚫 Block Downloads
     document.addEventListener("click", function (event) {
         if (event.target.tagName === "A" && event.target.hasAttribute("download")) {
             event.preventDefault();
-            alert("File downloads are not allowed!");
+            alert("Downloading is blocked!");
         }
     }, true);
 
-    // 🚫 Block Dragging Images (Prevents Image Download)
+    // 🚫 Prevent Image Dragging (Stops Downloading Images)
     document.addEventListener("dragstart", function (event) {
         if (event.target.tagName === "IMG") {
             event.preventDefault();
@@ -248,7 +260,7 @@
         }
     });
 
-    // 🚫 Detect Developer Tools (DevTools)
+    // 🚫 Detect Developer Tools (DevTools) and Redirect
     (function () {
         let devtools = { open: false, orientation: null };
         const threshold = 160;
@@ -259,8 +271,8 @@
 
             if (widthThreshold || heightThreshold) {
                 devtools.open = true;
-                alert("Developer tools detected! Access denied.");
-                window.location.reload();
+                alert("Developer tools detected! Redirecting...");
+                window.location.href = "https://google.com"; // Redirect user
             } else {
                 devtools.open = false;
             }
@@ -273,6 +285,7 @@
     });
 
 </script>
+
 
  
 </head>
