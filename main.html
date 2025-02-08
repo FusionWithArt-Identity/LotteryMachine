@@ -72,6 +72,13 @@
                 cursor: pointer;
             `;
             document.body.appendChild(logoutButton);
+
+            // Prevent Back Navigation
+            history.pushState(null, null, location.href);
+            window.onpopstate = function () {
+                history.pushState(null, null, location.href);
+                alert("Back button is disabled on this page.");
+            };
         };
 
         // Detect refresh attempt and ask for confirmation
