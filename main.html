@@ -7,21 +7,19 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCt2TbxPxkwaG2NsWmlfzSiPFRXZbhAY9Y",
-            authDomain: "lotterymachine-f5fcc.firebaseapp.com",
-            projectId: "lotterymachine-f5fcc",
-            storageBucket: "lotterymachine-f5fcc.firebasestorage.app",
-            messagingSenderId: "157697357273",
-            appId: "1:157697357273:web:f7cc38fecdcef9159d15c8"
-        };
+    // Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCt2TbxPxkwaG2NsWmlfzSiPFRXZbhAY9Y",
+  authDomain: "lotterymachine-f5fcc.firebaseapp.com",
+  projectId: "lotterymachine-f5fcc",
+  storageBucket: "lotterymachine-f5fcc.firebasestorage.app",
+  messagingSenderId: "157697357273",
+  appId: "1:157697357273:web:f7cc38fecdcef9159d15c8"
+};
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
         const lockRef = doc(db, "site_settings", "lockState");
 
         // Get token from URL
@@ -39,19 +37,6 @@
                 window.location.replace("index.html");
             }
         });
-
-        // Prevent Back Navigation Based on Firestore Lock
-        async function checkBackNavigationLock() {
-            const docSnap = await getDoc(lockRef);
-            if (docSnap.exists() && docSnap.data().backNavigationLocked) {
-                history.pushState(null, null, location.href);
-                window.onpopstate = function () {
-                    history.pushState(null, null, location.href);
-                    alert("Back navigation is locked by the administrator.");
-                };
-            }
-        }
-        checkBackNavigationLock();
 
         let logoutTimeout;
 
@@ -71,22 +56,43 @@
             document.getElementById("logoutModal").style.display = "none";
         };
 
-        // Prevent Back Navigation After Login
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
+        window.onload = function () {
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.onclick = logout;
+            logoutButton.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                background-color: red;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            document.body.appendChild(logoutButton);
+
+            // Prevent Back Navigation
+            history.pushState(null, null, location.href);
+            window.onpopstate = function () {
+                history.pushState(null, null, location.href);
+                alert("Back button is disabled on this page.");
+            };
+        };
+
+        // Prevent Back Navigation Based on Firestore Lock
+        async function checkBackNavigationLock() {
+            const docSnap = await getDoc(lockRef);
+            if (docSnap.exists() && docSnap.data().backNavigationLocked) {
                 history.pushState(null, null, location.href);
                 window.onpopstate = function () {
-                    history.go(1);
+                    history.pushState(null, null, location.href);
+                    alert("Back navigation is locked by the administrator.");
                 };
             }
-        });
-
-        // Redirect Logged-in Users Away from Login Page
-        onAuthStateChanged(auth, (user) => {
-            if (user && window.location.pathname === "/login.html") {
-                window.location.href = "main.html";
-            }
-        });
+        }
+        checkBackNavigationLock();
 
         // Detect refresh attempt and ask for confirmation
         window.addEventListener("beforeunload", function (event) {
@@ -94,8 +100,7 @@
             event.returnValue = "Are you sure you want to refresh the page?";
         });
     </script>
-</head>
-<body>
+
     <!-- Logout Confirmation Modal -->
     <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 999999;">
         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
@@ -104,8 +109,7 @@
             <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
         </div>
     </div>
-</body>
-</html>
+</head>
 
 
 	
