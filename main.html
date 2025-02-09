@@ -83,7 +83,7 @@
 
         // Additional Mobile-Specific Handling
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            // Prevent Force-Closing on Mobile
+            // Warn User Before Exiting
             window.addEventListener("beforeunload", function (event) {
                 event.preventDefault();
                 event.returnValue = "Are you sure you want to leave? Use the Logout button to exit properly.";
