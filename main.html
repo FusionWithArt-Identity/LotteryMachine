@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
- <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -78,19 +78,18 @@
             alert("Back button is disabled on this page.");
         };
 
-       // 📱 Mobile-Specific Handling
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    // Warn User Before Exiting
-    window.addEventListener("beforeunload", function (event) {
-        event.preventDefault();
-        event.returnValue = "Use the Logout button to exit properly.";
-        setTimeout(() => location.reload(), 100); // 🔥 Forces reload if they press "Leave"
-    });
+        // 📱 Mobile-Specific Handling
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // Warn User Before Exiting
+            window.addEventListener("beforeunload", function (event) {
+                event.preventDefault();
+                event.returnValue = "Use the Logout button to exit properly.";
+            });
 
-    // 🛑 Prevent Mobile Back Button Exit
-    setInterval(() => history.pushState(null, null, location.href), 1000);
-}
-
+            // 🛑 Prevent Mobile Back Button Exit
+            setInterval(() => history.pushState(null, null, location.href), 1000);
+        }
+    };
 
     // Prevent Caching (Use this in your .htaccess or PHP headers)
     document.head.insertAdjacentHTML(
