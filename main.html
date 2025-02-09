@@ -8,7 +8,7 @@
 
 	<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // Firebase Configuration
     const firebaseConfig = {
@@ -58,61 +58,41 @@
         document.getElementById("logoutModal").style.display = "none";
     };
 
-    window.onload = function () {
-        const logoutButton = document.createElement("button");
-        logoutButton.textContent = "Logout";
-        logoutButton.onclick = logout;
-        logoutButton.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        `;
-        document.body.appendChild(logoutButton);
-    };
-
-    // Function to Lock Back Navigation
-    function preventBackNavigation() {
+    // Function to fully disable back navigation
+    function disableBackNavigation() {
         history.pushState(null, null, location.href);
+        history.pushState(null, null, location.href);
+
         window.onpopstate = function () {
             history.pushState(null, null, location.href);
             alert("Back navigation is disabled.");
         };
 
-        // Handle Mobile Back Button Lock
-        window.addEventListener("keydown", function (e) {
-            if (e.key === "Backspace" && (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA")) {
-                e.preventDefault();
-                alert("Back navigation is disabled.");
+        // Disable Android Back Button
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Backspace" || event.key === "Escape") {
+                event.preventDefault();
+                alert("Back navigation is blocked.");
             }
         });
 
-        // Ensure the user cannot swipe back on mobile
-        window.addEventListener("touchstart", function (e) {
-            if (e.touches.length === 2) {
-                e.preventDefault();
+        // Prevent swipe back gestures (for mobile browsers)
+        window.addEventListener("touchstart", function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
             }
         }, { passive: false });
+
+        // Constantly keep adding entries to prevent back action
+        setInterval(() => {
+            history.pushState(null, null, location.href);
+        }, 1000);
     }
 
-    // Function to Unlock Back Navigation
-    function allowBackNavigation() {
-        window.onpopstate = null;
-        window.removeEventListener("keydown", preventBackNavigation);
-        window.removeEventListener("touchstart", preventBackNavigation);
-    }
-
-    // Firestore Listener for Back Navigation Lock
+    // Listen to Firestore for Back Navigation Locking
     onSnapshot(lockRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().backNavigationLocked) {
-            preventBackNavigation();
-        } else {
-            allowBackNavigation();
+            disableBackNavigation();
         }
     });
 
@@ -120,6 +100,11 @@
     window.addEventListener("beforeunload", function (event) {
         event.preventDefault();
         event.returnValue = "Are you sure you want to refresh the page?";
+    });
+
+    // Prevent accidental navigation
+    window.addEventListener("DOMContentLoaded", () => {
+        disableBackNavigation();
     });
 </script>
 
@@ -131,6 +116,8 @@
         <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
     </div>
 </div>
+
+</head>
 
 
 	
