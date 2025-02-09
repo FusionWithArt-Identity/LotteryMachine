@@ -42,6 +42,7 @@
 
     let logoutTimeout;
 
+    // Logout button function
     window.logout = function () {
         document.getElementById("logoutModal").style.display = "flex";
         logoutTimeout = setTimeout(() => {
@@ -49,6 +50,7 @@
         }, 3000);
     };
 
+    // Confirm logout
     window.confirmLogout = function (choice) {
         clearTimeout(logoutTimeout);
         if (choice) {
@@ -102,10 +104,27 @@
         event.returnValue = "Are you sure you want to refresh the page?";
     });
 
-    // Prevent accidental navigation
-    window.addEventListener("DOMContentLoaded", () => {
+    // Prevent accidental navigation and add Logout Button
+    window.onload = function () {
         disableBackNavigation();
-    });
+
+        const logoutButton = document.createElement("button");
+        logoutButton.textContent = "Logout";
+        logoutButton.onclick = logout;
+        logoutButton.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 99999;
+        `;
+        document.body.appendChild(logoutButton);
+    };
 </script>
 
 <!-- Logout Confirmation Modal -->
