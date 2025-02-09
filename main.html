@@ -38,6 +38,7 @@
     });
 
     let logoutTimeout;
+    let isLoggingOut = false; // Flag to track if the user is logging out
 
     window.logout = function () {
         document.getElementById("logoutModal").style.display = "flex";
@@ -49,6 +50,7 @@
     window.confirmLogout = function (choice) {
         clearTimeout(logoutTimeout);
         if (choice) {
+            isLoggingOut = true; // Set the flag to true when the user confirms logout
             location.replace("index.html");
         }
         document.getElementById("logoutModal").style.display = "none";
@@ -80,15 +82,17 @@
 
         // 📱 Mobile-Specific Handling
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            // Warn User Before Exiting
-            window.addEventListener("beforeunload", function (event) {
-                event.preventDefault();
-                event.returnValue = "Use the Logout button to exit properly.";
-            });
-
-            // 🛑 Prevent Mobile Back Button Exit
+            // Prevent Mobile Back Button Exit
             setInterval(() => history.pushState(null, null, location.href), 1000);
         }
+
+        // Prevent navigation away from the page unless logging out
+        window.addEventListener('beforeunload', function (e) {
+            if (!isLoggingOut) {
+                e.preventDefault();
+                e.returnValue = 'Use the Logout button to exit properly.';
+            }
+        });
     };
 
     // Prevent Caching (Use this in your .htaccess or PHP headers)
@@ -108,7 +112,6 @@
         <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
     </div>
 </div>
-
 	
 </head>
 
