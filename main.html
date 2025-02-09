@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
-   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -77,15 +77,19 @@
         history.pushState(null, null, location.href);
 
         window.onpopstate = function () {
-            history.pushState(null, null, location.href);
-            alert("Back button is disabled on this page.");
+            history.pushState(null, null, location.href); // Re-push the current state
+            const confirmExit = confirm("Are you sure you want to exit? Use the Logout button to exit properly.");
+            if (confirmExit) {
+                sessionStorage.removeItem("authToken");
+                window.location.replace("index.html");
+            }
         };
     };
 
     // Detect refresh attempt and ask for confirmation
     window.addEventListener("beforeunload", function (event) {
         event.preventDefault();
-        event.returnValue = "Are you sure you want to refresh the page?";
+        event.returnValue = "Are you sure you want to leave? Use the Logout button to exit properly.";
     });
 </script>
 
