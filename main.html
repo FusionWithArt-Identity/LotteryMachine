@@ -75,9 +75,6 @@
 
         // Prevent Back Navigation
         history.pushState(null, null, location.href);
-        setInterval(() => {
-            history.pushState(null, null, location.href);
-        }, 100);
 
         window.onpopstate = function () {
             history.pushState(null, null, location.href);
