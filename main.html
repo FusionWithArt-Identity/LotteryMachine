@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lottery Machine by MMD</title>
 
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -71,14 +71,14 @@
         `;
         document.body.appendChild(logoutButton);
 
-        // Prevent Back Navigation
-        history.replaceState(null, null, location.href);
-
+        // 🚀 Prevent Back Navigation (Desktop + Mobile)
+        history.pushState(null, null, location.href);
         window.onpopstate = function () {
-            location.replace("index.html");
+            history.pushState(null, null, location.href);
+            alert("Back button is disabled on this page.");
         };
 
-        // Mobile-Specific Handling
+        // 📱 Mobile-Specific Handling
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             // Warn User Before Exiting
             window.addEventListener("beforeunload", function (event) {
@@ -86,13 +86,8 @@
                 event.returnValue = "Use the Logout button to exit properly.";
             });
 
-            // Handle Mobile Back Button
-            window.addEventListener("popstate", function () {
-                const confirmExit = confirm("Are you sure you want to exit? Use the Logout button.");
-                if (confirmExit) {
-                    location.replace("index.html");
-                }
-            });
+            // 🛑 Prevent Mobile Back Button Exit
+            setInterval(() => history.pushState(null, null, location.href), 1000);
         }
     };
 
