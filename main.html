@@ -4,112 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCt2TbxPxkwaG2NsWmlfzSiPFRXZbhAY9Y",
-  authDomain: "lotterymachine-f5fcc.firebaseapp.com",
-  projectId: "lotterymachine-f5fcc",
-  storageBucket: "lotterymachine-f5fcc.firebasestorage.app",
-  messagingSenderId: "157697357273",
-  appId: "1:157697357273:web:f7cc38fecdcef9159d15c8"
-};
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const lockRef = doc(db, "site_settings", "lockState");
+	<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Get token from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get("token");
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCt2TbxPxkwaG2NsWmlfzSiPFRXZbhAY9Y",
+        authDomain: "lotterymachine-f5fcc.firebaseapp.com",
+        projectId: "lotterymachine-f5fcc",
+        storageBucket: "lotterymachine-f5fcc.firebasestorage.app",
+        messagingSenderId: "157697357273",
+        appId: "1:157697357273:web:f7cc38fecdcef9159d15c8"
+    };
 
-        if (!token || token !== sessionStorage.getItem("authToken")) {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const lockRef = doc(db, "site_settings", "lockState");
+
+    // Get token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (!token || token !== sessionStorage.getItem("authToken")) {
+        window.location.replace("index.html");
+    }
+
+    // Auto Logout if Site is Locked
+    onSnapshot(lockRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().locked) {
+            sessionStorage.removeItem("authToken");
             window.location.replace("index.html");
         }
+    });
 
-        // Auto Logout if Site is Locked
-        onSnapshot(lockRef, (docSnap) => {
-            if (docSnap.exists() && docSnap.data().locked) {
-                sessionStorage.removeItem("authToken");
-                window.location.replace("index.html");
-            }
-        });
+    let logoutTimeout;
 
-        let logoutTimeout;
-
-        window.logout = function () {
-            document.getElementById("logoutModal").style.display = "flex";
-            logoutTimeout = setTimeout(() => {
-                document.getElementById("logoutModal").style.display = "none";
-            }, 3000);
-        };
-
-        window.confirmLogout = function (choice) {
-            clearTimeout(logoutTimeout);
-            if (choice) {
-                sessionStorage.removeItem("authToken");
-                window.location.replace("index.html");
-            }
+    window.logout = function () {
+        document.getElementById("logoutModal").style.display = "flex";
+        logoutTimeout = setTimeout(() => {
             document.getElementById("logoutModal").style.display = "none";
-        };
+        }, 3000);
+    };
 
-        window.onload = function () {
-            const logoutButton = document.createElement("button");
-            logoutButton.textContent = "Logout";
-            logoutButton.onclick = logout;
-            logoutButton.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                padding: 10px 15px;
-                background-color: red;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            `;
-            document.body.appendChild(logoutButton);
-
-            // Prevent Back Navigation
-            history.pushState(null, null, location.href);
-            window.onpopstate = function () {
-                history.pushState(null, null, location.href);
-                alert("Back button is disabled on this page.");
-            };
-        };
-
-        // Prevent Back Navigation Based on Firestore Lock
-        async function checkBackNavigationLock() {
-            const docSnap = await getDoc(lockRef);
-            if (docSnap.exists() && docSnap.data().backNavigationLocked) {
-                history.pushState(null, null, location.href);
-                window.onpopstate = function () {
-                    history.pushState(null, null, location.href);
-                    alert("Back navigation is locked by the administrator.");
-                };
-            }
+    window.confirmLogout = function (choice) {
+        clearTimeout(logoutTimeout);
+        if (choice) {
+            sessionStorage.removeItem("authToken");
+            window.location.replace("index.html");
         }
-        checkBackNavigationLock();
+        document.getElementById("logoutModal").style.display = "none";
+    };
 
-        // Detect refresh attempt and ask for confirmation
-        window.addEventListener("beforeunload", function (event) {
-            event.preventDefault();
-            event.returnValue = "Are you sure you want to refresh the page?";
+    window.onload = function () {
+        const logoutButton = document.createElement("button");
+        logoutButton.textContent = "Logout";
+        logoutButton.onclick = logout;
+        logoutButton.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        `;
+        document.body.appendChild(logoutButton);
+    };
+
+    // Function to Lock Back Navigation
+    function preventBackNavigation() {
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+            alert("Back navigation is disabled.");
+        };
+
+        // Handle Mobile Back Button Lock
+        window.addEventListener("keydown", function (e) {
+            if (e.key === "Backspace" && (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA")) {
+                e.preventDefault();
+                alert("Back navigation is disabled.");
+            }
         });
-    </script>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 999999;">
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
-            <p>Are You Sure Want to Quit/ Exit?</p>
-            <button onclick="window.confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
-            <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
-        </div>
+        // Ensure the user cannot swipe back on mobile
+        window.addEventListener("touchstart", function (e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    // Function to Unlock Back Navigation
+    function allowBackNavigation() {
+        window.onpopstate = null;
+        window.removeEventListener("keydown", preventBackNavigation);
+        window.removeEventListener("touchstart", preventBackNavigation);
+    }
+
+    // Firestore Listener for Back Navigation Lock
+    onSnapshot(lockRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().backNavigationLocked) {
+            preventBackNavigation();
+        } else {
+            allowBackNavigation();
+        }
+    });
+
+    // Detect refresh attempt and ask for confirmation
+    window.addEventListener("beforeunload", function (event) {
+        event.preventDefault();
+        event.returnValue = "Are you sure you want to refresh the page?";
+    });
+</script>
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 999999;">
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
+        <p>Are You Sure Want to Quit/ Exit?</p>
+        <button onclick="window.confirmLogout(true)" style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
+        <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
     </div>
-</head>
+</div>
 
 
 	
