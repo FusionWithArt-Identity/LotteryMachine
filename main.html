@@ -84,6 +84,14 @@
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             // Prevent Mobile Back Button Exit
             setInterval(() => history.pushState(null, null, location.href), 1000);
+
+            // Handle Hardware Back Button
+            window.addEventListener('popstate', function (event) {
+                if (!isLoggingOut) {
+                    history.pushState(null, null, location.href);
+                    alert("Use the Logout button to exit properly.");
+                }
+            });
         }
 
         // Prevent navigation away from the page unless logging out
