@@ -22,19 +22,18 @@
     const db = getFirestore(app);
     const lockRef = doc(db, "site_settings", "lockState");
 
-    // Get token from URL
+    // Get token from URL (No session storage)
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
 
-    if (!token || token !== sessionStorage.getItem("authToken")) {
-        window.location.replace("index.html");
+    if (!token) {
+        location.replace("index.html");
     }
 
     // Auto Logout if Site is Locked
     onSnapshot(lockRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().locked) {
-            sessionStorage.removeItem("authToken");
-            window.location.replace("index.html");
+            location.replace("index.html");
         }
     });
 
@@ -50,8 +49,7 @@
     window.confirmLogout = function (choice) {
         clearTimeout(logoutTimeout);
         if (choice) {
-            sessionStorage.removeItem("authToken");
-            window.location.replace("index.html");
+            location.replace("index.html");
         }
         document.getElementById("logoutModal").style.display = "none";
     };
@@ -73,33 +71,38 @@
         `;
         document.body.appendChild(logoutButton);
 
-        // Prevent Back Navigation on Desktop
-        history.pushState(null, null, location.href);
+        // Prevent Back Navigation
+        history.replaceState(null, null, location.href);
 
         window.onpopstate = function () {
-            history.pushState(null, null, location.href);
-            alert("Back button is disabled on this page.");
+            location.replace("index.html");
         };
 
-        // Additional Mobile-Specific Handling
+        // Mobile-Specific Handling
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             // Warn User Before Exiting
             window.addEventListener("beforeunload", function (event) {
                 event.preventDefault();
-                event.returnValue = "Are you sure you want to leave? Use the Logout button to exit properly.";
+                event.returnValue = "Use the Logout button to exit properly.";
             });
 
             // Handle Mobile Back Button
-            window.addEventListener("popstate", function (event) {
-                history.pushState(null, null, location.href); // Re-push the current state
-                const confirmExit = confirm("Are you sure you want to exit? Use the Logout button to exit properly.");
+            window.addEventListener("popstate", function () {
+                const confirmExit = confirm("Are you sure you want to exit? Use the Logout button.");
                 if (confirmExit) {
-                    sessionStorage.removeItem("authToken");
-                    window.location.replace("index.html");
+                    location.replace("index.html");
                 }
             });
         }
     };
+
+    // Prevent Caching (Use this in your .htaccess or PHP headers)
+    document.head.insertAdjacentHTML(
+        "beforeend",
+        `<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+         <meta http-equiv="Pragma" content="no-cache">
+         <meta http-equiv="Expires" content="0">`
+    );
 </script>
 
 <!-- Logout Confirmation Modal -->
@@ -110,6 +113,7 @@
         <button onclick="window.confirmLogout(false)" style="background-color: blue; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">No</button>
     </div>
 </div>
+
 	
 </head>
 
