@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+ <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 999999;">
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); text-align: center;">
+            <p>Are You Sure Want to Quit/ Exit?</p>
+            <button onclick="confirmLogout(true)" style="background-color: red; color: white; padding: 10px;
+                border: none; border-radius: 5px; margin-right: 10px; cursor: pointer;">Yes</button>
+            <button onclick="confirmLogout(false)" style="background-color: blue; color: white; padding: 10px;
+                border: none; border-radius: 5px; cursor: pointer;">No</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCt2TbxPxkwaG2NsWmlfzSiPFRXZbhAY9Y",
+            authDomain: "lotterymachine-f5fcc.firebaseapp.com",
+            projectId: "lotterymachine-f5fcc",
+            storageBucket: "lotterymachine-f5fcc.firebasestorage.app",
+            messagingSenderId: "157697357273",
+            appId: "1:157697357273:web:f7cc38fecdcef9159d15c8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const lockRef = doc(db, "site_settings", "lockState");
+
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+
+        if (!token || token !== sessionStorage.getItem("authToken")) {
+            if (localStorage.getItem("sessionActive") !== "true") {
+                window.location.replace("index.html");
+            }
+        } else {
+            localStorage.setItem("sessionActive", "true");
+        }
+
+        // Auto Logout if Site is Locked
+        onSnapshot(lockRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().locked) {
+                sessionStorage.removeItem("authToken");
+                localStorage.removeItem("sessionActive");
+                window.location.replace("index.html");
+            }
+        });
+
+        let logoutTimeout;
+
+        window.logout = function () {
+            document.getElementById("logoutModal").style.display = "flex";
+            logoutTimeout = setTimeout(() => {
+                document.getElementById("logoutModal").style.display = "none";
+            }, 3000);
+        };
+
+        window.confirmLogout = function (choice) {
+            clearTimeout(logoutTimeout);
+            if (choice) {
+                sessionStorage.removeItem("authToken");
+                localStorage.removeItem("sessionActive");
+                window.location.replace("index.html");
+            }
+            document.getElementById("logoutModal").style.display = "none";
+        };
+
+        window.onload = function () {
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.onclick = logout;
+            logoutButton.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                background-color: red;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            document.body.appendChild(logoutButton);
+        };
+
+        // Function to Lock Back Navigation
+        function preventBackNavigation() {
+            history.pushState(null, null, location.href);
+            window.onpopstate = function () {
+                history.pushState(null, null, location.href);
+                alert("Back navigation is disabled.");
+            };
+
+            // Handle Mobile Back Button Lock
+            window.addEventListener("keydown", function (e) {
+                if (e.key === "Backspace" && (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA")) {
+                    e.preventDefault();
+                    alert("Back navigation is disabled.");
+                }
+            });
+
+            // Ensure the user cannot swipe back on mobile
+            window.addEventListener("touchstart", function (e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
+        // Function to Unlock Back Navigation
+        function allowBackNavigation() {
+            window.onpopstate = null;
+            window.removeEventListener("keydown", preventBackNavigation);
+            window.removeEventListener("touchstart", preventBackNavigation);
+        }
+
+        // Firestore Listener for Back Navigation Lock
+        onSnapshot(lockRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().backNavigationLocked) {
+                preventBackNavigation();
+            } else {
+                allowBackNavigation();
+            }
+        });
+
+        // Detect refresh attempt and ask for confirmation
+        window.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "Are you sure you want to refresh the page?";
+        });
+
+    </script>
+
+
+
+
+	
+<body>
+   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Machine</title>
+    </head>
+
+<style>
+
+
+#dateTimeDisplay {
+    position: absolute;
+    top: 10px; /* Adjust top position inside the box */
+    right: 20px; /* Adjust right position inside the box */
+    font-size: 0.8em;
+    color: #333;
+    background-color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-weight: bold;
+}
+
+        /* Original styles */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+overflow: auto;
+        }
+        .container {
+	    position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+		color: navy;
+            padding: 30px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+overflow: auto;
+        }
+        input {
+            width: calc(20% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+      button#start {
+    background-color: #28a745;
+    color: white;
+    border: 2px solid #1e7e34; /* Darker green border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for a raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#start:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #155724; /* Darker border color when active */
+}
+
+
+
+
+
+      button#reset {
+    background-color: #b22222; /* Dark red background */
+    color: white;
+    border: 2px solid #7f1a1a; /* Darker red border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#reset:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #5a1212; /* Darker border color when active */
+}
+
+
+        button#cancel {
+    background-color: #CD5C5C;
+    color: white;
+    border: 2px solid #b22222; /* Darker red border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for a raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#cancel:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #8b0000; /* Darker border color when active */
+}
+
+   
+      button#remove {
+    background-color: #FF0000; /* Bright red background */
+    color: white;
+    border: 2px solid #b20000; /* Darker red border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#remove:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #8b0000; /* Darker border color when active */
+}
+
+       button#download {
+    background-color: #808000; /* Olive background */
+    color: white;
+    border: 2px solid #666600; /* Darker olive border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#download:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #4d4d00; /* Darker border color when active */
+}
+
+
+        button#unsaveName {
+    background-color: #808080; /* Dark grey background */
+    color: white;
+    border: 2px solid #505050; /* Darker grey border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#unsaveName:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #303030; /* Darker border color when active */
+}
+
+            color: Black;
+	outline: 2px solid darkgrey; /* Adds a dark grey outline */
+           }
+button#unsaveName:focus {
+    outline: 2px solid black; /* Black outline when focused using TAB */
+}
+
+
+ 	button#saveName {
+    background-color: #808080; /* Dark grey background */
+    color: white;
+    border: 2px solid #505050; /* Darker grey border for default */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for raised effect */
+    transition: all 0.2s ease; /* Smooth transition for the effect */
+}
+
+button#saveName:active {
+    transform: translateY(-2px); /* Move the button slightly up */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Intensify the shadow */
+    border: 2px solid #303030; /* Darker border color when active */
+}
+
+            color: Black;
+	outline: 2px solid darkgrey; /* Adds a dark grey outline */
+           }
+button#saveName:focus {
+    outline: 2px solid black; /* Black outline when focused using TAB */
+}
+
+.rolling-box {
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+        }
+     
+        .rolling-box.small-text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #result {
+            color: purple;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .picked-numbers {
+            margin-top: 20px;
+            font-size: 16px;
+            font-style: italic;
+            font-weight: bold;
+        }
+        .picked-numbers span {
+            color: #22CE83;
+        }
+        .small-text {
+            font-size: 12px;
+        }
+        .cancelled-text {
+            color: grey;
+        }
+        .cancelled-from-pick {
+            color: #CD5C5C;
+        }
+        .removed-text {
+            color: #FF0000;
+        }
+        .removed-from-lottery {
+            color: #FF0000;
+        }
+        #lotteryHeader {
+            margin-top: 20px;
+            font-size: 16px;
+            width: 40%;
+        }
+        #lotteryNameDisplay {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+
+/* Updated style for outline colors */
+.saved-title {
+    border: 2px solid #32CD32; /* Light green border when saved and matching */
+}
+.unsaved-title {
+    border: 2px solid grey; /* Grey outline when not saved or blank */
+}
+.different-title {
+    border: 2px solid yellow; /* Yellow outline when input differs from saved title */
+}
+.unsaved-title-orange {
+    border: 2px solid orange; /* Orange outline when the saved title is removed/unsaved */
+}
+
+
+
+</style>
+
+
+<body>
+
+    <div class="container">
+        <!-- Floating Elements -->
+        <div id="dateTimeDisplay">--- | --- Hrs</div>
+
+
+        <!-- Title Section -->
+        <h1>Lottery Machine</h1>
+
+      <!-- Lottery Title Section -->
+        <label for="lotteryHeader"><i>Lottery Title</i></label>
+        <input type="text" id="lotteryHeader" placeholder="Enter a Title for the lottery...">
+  
+
+        <!-- Range Input Section -->
+        <div class="range-section">
+            <label for="startRange">Starting Number Range:</label>
+            <input type="number" id="startRange" placeholder="Enter starting number">
+<br>
+            <label for="endRange">Ending Number Range:</label>
+            <input type="number" id="endRange" placeholder="Enter ending number">
+        </div>
+
+
+            <button id="saveName">Save</button>
+            <button id="unsaveName">Unsave</button>
+
+ <div id="lotteryNameDisplay"></div>
+
+        <!-- Rolling Box Section -->
+        <div class="rolling-box" id="rollingBox">---</div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button id="start">Start Rolling</button>
+            <button id="cancel">Cancel This Pick</button>
+            <button id="remove">Remove/Delete Last Pick</button>
+            <button id="reset">Reset</button>
+            <button id="download">Download Lottery Details</button>
+        </div>
+        <div><p><strong>Picked Number:  </strong><span id="result">   -  </span></p></div>
+        <div class="picked-numbers" id="pickedNumbers">Result: </div>
+    </div>
+
+
+    <script>
+
+const startButton = document.getElementById('start');
+const resetButton = document.getElementById('reset');
+const cancelButton = document.getElementById('cancel');
+const removeButton = document.getElementById('remove');
+const downloadButton = document.getElementById('download');
+const startRangeInput = document.getElementById('startRange');
+const endRangeInput = document.getElementById('endRange');
+const rollingBox = document.getElementById('rollingBox');
+const resultField = document.getElementById('result');
+const pickedNumbersField = document.getElementById('pickedNumbers');
+const lotteryHeaderInput = document.getElementById('lotteryHeader');
+const lotteryNameDisplay = document.getElementById('lotteryNameDisplay');
+const saveNameButton = document.getElementById('saveName');
+const unsaveNameButton = document.getElementById('unsaveName');
+
+let rollingInterval;
+let pickedNumbers = [];
+let removedNumbers = [];
+let cancelledNumbers = [];
+let lotteryName = "";
+let savedRange = {}; // New variable to store saved ranges
+
+
+
+
+// Function to update the lottery name display
+function updateLotteryNameDisplay() {
+    if (lotteryName) {
+        const savedRangeData = savedRange[lotteryName];
+        if (savedRangeData) {
+            lotteryNameDisplay.textContent = `Lottery Title: ${lotteryName} (Range: ${savedRangeData.start} - ${savedRangeData.end})`;
+        } else {
+            lotteryNameDisplay.textContent = `Lottery Title: ${lotteryName}`;
+        }
+    } else {
+        lotteryNameDisplay.textContent = '';
+    }
+
+    // Check if the lottery name display is empty and set the outline accordingly
+    updateOutlineBasedOnInput();
+}
+
+// Save the lottery name when the Save button is pressed
+saveNameButton.addEventListener('click', () => {
+    if (lotteryName) {
+        alert('A title is already saved! Please unsave the current title before saving a new one.');
+        return;
+    }
+
+    const title = lotteryHeaderInput.value.trim();
+    if (!title) {
+        alert('Please enter a Title for the lottery!');
+        return;
+    }
+
+    const startRange = parseInt(startRangeInput.value);
+    const endRange = parseInt(endRangeInput.value);
+
+    if (isNaN(startRange) || isNaN(endRange) || startRange >= endRange) {
+        alert('Please enter valid Start and End Range values.');
+        return;
+    }
+
+    lotteryName = title;
+    savedRange[lotteryName] = { start: startRange, end: endRange };
+    updateLotteryNameDisplay();
+
+    // Apply saved state outline (light green)
+    applyOutline('saved-title');
+
+    // Lock the input fields after saving
+    startRangeInput.setAttribute('readonly', true);
+    endRangeInput.setAttribute('readonly', true);
+    lotteryHeaderInput.setAttribute('readonly', true);
+});
+
+// Unsave the lottery name when the Unsave button is pressed
+unsaveNameButton.addEventListener('click', () => {
+    if (!lotteryName) {
+        alert('No Saved Title Found!');
+        return;
+    }
+
+    const previousName = lotteryName; // Store the name before clearing it
+    lotteryName = "";
+    updateLotteryNameDisplay();
+
+    // Remove the saved range correctly
+    delete savedRange[previousName];
+
+    // Unlock the input fields
+    startRangeInput.removeAttribute('readonly');
+    endRangeInput.removeAttribute('readonly');
+    lotteryHeaderInput.removeAttribute('readonly');
+
+    // Apply orange outline if it was previously saved
+    if (startRangeInput.classList.contains('saved-title')) {
+        applyOutline('unsaved-title-orange');
+    } else {
+        applyOutline('unsaved-title'); // Keep grey if no saved state existed
+    }
+});
+
+
+// Function to update the outline of input fields
+function updateOutlineBasedOnInput() {
+    if (lotteryHeaderInput.value.trim() === "" && lotteryName === "") {
+        applyOutline('unsaved-title'); // Grey outline (initial state)
+    } else if (lotteryName && lotteryHeaderInput.value.trim() === lotteryName) {
+        applyOutline('saved-title'); // Light green (saved state)
+    } else if (lotteryName && lotteryHeaderInput.value.trim() !== lotteryName) {
+        applyOutline('different-title'); // Yellow (modified state)
+    }
+}
+
+// Function to apply outline color to all relevant input fields
+function applyOutline(className) {
+    [lotteryHeaderInput, startRangeInput, endRangeInput].forEach(input => {
+        input.classList.remove('saved-title', 'unsaved-title', 'different-title', 'unsaved-title-orange');
+        input.classList.add(className);
+    });
+}
+
+// Listen for input changes to update outlines dynamically
+lotteryHeaderInput.addEventListener('input', updateOutlineBasedOnInput);
+startRangeInput.addEventListener('input', updateOutlineBasedOnInput);
+endRangeInput.addEventListener('input', updateOutlineBasedOnInput);
+
+
+
+// Initially update the outline
+updateLotteryNameDisplay();
+
+// Function to disable the buttons
+function disableButtons() {
+    startButton.disabled = true;
+    resetButton.disabled = true;
+    cancelButton.disabled = true;
+    removeButton.disabled = true;
+}
+
+// Function to enable the buttons
+function enableButtons() {
+    startButton.disabled = false;
+    resetButton.disabled = false;
+    cancelButton.disabled = false;
+    removeButton.disabled = false;
+}
+
+function updateRollingBoxStatus() {
+  const focusedElement = document.activeElement; 
+
+  if (focusedElement === lotteryHeaderInput) {
+    rollingBox.textContent = "Entering Title...";
+  } else if (focusedElement === startRangeInput) {
+    rollingBox.textContent = "Entering Starting Number...";
+  } else if (focusedElement === endRangeInput) {
+    rollingBox.textContent = "Entering Ending Number...";
+  } else {
+    // Check if all input fields have values
+    if (lotteryHeaderInput.value && startRangeInput.value && endRangeInput.value) {
+      const startRange = parseInt(startRangeInput.value);
+      const endRange = parseInt(endRangeInput.value);
+
+      if (startRange >= endRange) {
+        rollingBox.textContent = "First Number Must be Less than Last Number of The Range"; 
+      } else {
+        rollingBox.textContent = "Save to Proceed"; 
+      }
+    } else if (lotteryHeaderInput.value || startRangeInput.value || endRangeInput.value) { 
+      rollingBox.textContent = "~"; 
+    } else if (!lotteryName) { 
+      rollingBox.textContent = '---'; 
+    } 
+  }
+
+  // If lotteryName is saved, perform range validation 
+  if (lotteryName) { 
+    const startRange = parseInt(startRangeInput.value);
+    const endRange = parseInt(endRangeInput.value);
+
+    if (!startRange && !endRange) {
+      rollingBox.textContent = '---'; 
+    } else if (!startRange) {
+      rollingBox.textContent = 'Enter first number of the Range';
+    } else if (!endRange) {
+      rollingBox.textContent = 'Enter last number of the Range';
+    } else if (parseInt(startRange) > parseInt(endRange)) {
+      rollingBox.textContent = 'The Starting Number of the Range Cannot be Greater Than the Last Number';
+    } else if (parseInt(startRange) === parseInt(endRange)) {
+      rollingBox.textContent = 'Both Numbers in the Range Cannot Be the Same';
+    } else {
+      rollingBox.textContent = 'Ready to Roll';
+    }
+  } 
+}
+
+// Add event listeners to trigger the update
+lotteryHeaderInput.addEventListener('focus', updateRollingBoxStatus);
+startRangeInput.addEventListener('focus', updateRollingBoxStatus);
+endRangeInput.addEventListener('focus', updateRollingBoxStatus);
+lotteryHeaderInput.addEventListener('blur', updateRollingBoxStatus); 
+startRangeInput.addEventListener('blur', updateRollingBoxStatus);
+endRangeInput.addEventListener('blur', updateRollingBoxStatus); 
+
+// Initial call to set the initial status
+updateRollingBoxStatus();
+
+
+
+
+function updatePickedNumbersDisplay() {
+    if (pickedNumbers.length <= 10) {
+        pickedNumbersField.innerHTML = `Result: <span>${pickedNumbers.join(', ')}</span>`;
+    } else {
+        pickedNumbersField.innerHTML = `Result: <span>${pickedNumbers.slice(0, 10).join(', ')}</span>...`;
+    }
+}
+
+// Add event listeners to dynamically update the status when input changes
+startRangeInput.addEventListener('input', updateRollingBoxStatus);
+endRangeInput.addEventListener('input', updateRollingBoxStatus);
+
+// Also trigger updateRollingBoxStatus when the lottery name is saved or unsaved
+saveNameButton.addEventListener('click', updateRollingBoxStatus);
+unsaveNameButton.addEventListener('click', updateRollingBoxStatus);
+
+
+// Dynamically add AutoMode Checkbox and Rolling Frequency Field
+const autoModeContainer = document.createElement('div');
+autoModeContainer.innerHTML = `
+    <label>
+        <input type="checkbox" id="autoModeCheckbox"> Enable Auto Rolling
+    </label>
+    <input type="text" id="rollingFrequencyInput" placeholder="Rolling Frequency (or %)" disabled>
+`;
+document.querySelector('.button-group').prepend(autoModeContainer);
+
+const autoModeCheckbox = document.getElementById('autoModeCheckbox');
+const rollingFrequencyInput = document.getElementById('rollingFrequencyInput');
+let autoRollingCount = 0;
+let targetRollingFrequency = 0;
+
+startButton.addEventListener('click', () => {
+    // Check if there is no saved title
+    if (!lotteryName) {
+        alert('Please save a lottery title before starting the rolling!');
+        return;
+    }
+
+    const startRange = parseInt(startRangeInput.value);
+    const endRange = parseInt(endRangeInput.value);
+    const totalNumbers = endRange - startRange + 1;
+
+    if (!startRangeInput.value || !endRangeInput.value || isNaN(startRange) || isNaN(endRange) || startRange >= endRange) {
+        alert('Please enter valid number ranges!');
+        return;
+    }
+
+    let availableNumbers = Array.from({ length: totalNumbers }, (_, i) => startRange + i)
+        .filter(num => !pickedNumbers.includes(num) && !removedNumbers.includes(num));
+
+    if (availableNumbers.length === 0) {
+        rollingBox.textContent = 'All numbers in this range have been picked!';
+        rollingBox.classList.add('small-text');
+        resultField.textContent = '---';
+        alert("No New Number is Left to be Picked in the Current Range");
+        return;
+    }
+
+    if (autoModeCheckbox.checked) {
+        let frequencyValue = rollingFrequencyInput.value.trim();
+        if (frequencyValue.includes('%')) {
+            let percentage = parseFloat(frequencyValue.replace('%', ''));
+            if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+                alert("Invalid Frequency %");
+                return;
+            }
+            targetRollingFrequency = Math.floor((percentage / 100) * totalNumbers);
+        } else {
+            targetRollingFrequency = parseInt(frequencyValue) || 1;
+        }
+
+        if (targetRollingFrequency < 1) {
+            alert("Invalid Frequency %");
+            return;
+        }
+
+        if (targetRollingFrequency > totalNumbers) {
+            alert("Rolling Frequency is greater than available numbers! Reduce the frequency or extend the range.");
+            return;
+        }
+    }
+
+    // Disable all input fields when rolling starts
+    lockInputs();
+
+    rollingBox.textContent = 'Rolling...';
+    rollingBox.classList.remove('small-text');
+    resultField.textContent = '-';
+
+    startButton.textContent = 'Rolling Now';
+    startButton.style.backgroundColor = 'skyblue';
+
+    disableButtons();
+
+    clearInterval(rollingInterval);
+    rollingInterval = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+        rollingBox.textContent = availableNumbers[randomIndex];
+    }, 100);
+
+    setTimeout(() => {
+        clearInterval(rollingInterval);
+        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+        const finalNumber = availableNumbers[randomIndex];
+        rollingBox.textContent = finalNumber;
+        resultField.textContent = finalNumber;
+        pickedNumbers.push(finalNumber);
+        updatePickedNumbersDisplay();
+
+        availableNumbers = availableNumbers.filter(num => num !== finalNumber);
+
+        startButton.textContent = autoModeCheckbox.checked ? 'Auto Rolling' : 'Start Rolling';
+        startButton.style.backgroundColor = '#28a745';
+
+        enableButtons();
+
+        if (autoModeCheckbox.checked) {
+            autoRollingCount++;
+            if (autoRollingCount < targetRollingFrequency) {
+                startAutoRolling();
+            } else {
+                rollingBox.textContent = 'Auto Rolling Completed!';
+                rollingBox.classList.add('small-text');
+                autoRollingCount = 0; // Reset the counter after auto-rolling is completed
+            }
+        } else if (availableNumbers.length === 0) {
+            rollingBox.textContent = 'All numbers in this range have been picked!';
+            rollingBox.classList.add('small-text');
+        }
+    }, 3000);
+
+    if (autoModeCheckbox.checked && autoRollingCount === 0) {
+        autoRollingCount = 0;
+    }
+});
+
+function startAutoRolling() {
+    setTimeout(() => {
+        startButton.click();
+    }, 1000); // Adjust the delay between rolls if needed
+}
+
+// Function to disable all input fields when rolling starts
+function lockInputs() {
+    startRangeInput.disabled = true;
+    endRangeInput.disabled = true;
+    lotteryHeaderInput.disabled = true;
+    rollingFrequencyInput.disabled = true;
+    autoModeCheckbox.disabled = true;
+}
+
+// Function to re-enable all input fields when reset is triggered
+function unlockInputs() {
+    startRangeInput.disabled = false;
+    endRangeInput.disabled = false;
+    lotteryHeaderInput.disabled = false;
+    rollingFrequencyInput.disabled = !autoModeCheckbox.checked; // Only enable if auto mode is checked
+    autoModeCheckbox.disabled = false;
+}
+
+function startAutoRolling() {
+    setTimeout(() => {
+        startButton.click();
+    }, 4000);
+}
+
+function disableButtons() {
+    startButton.disabled = true;
+}
+
+function enableButtons() {
+    startButton.disabled = false;
+}
+
+// AutoMode Feature
+autoModeCheckbox.addEventListener('change', () => {
+    if (!lotteryName) {
+        autoModeCheckbox.checked = false;
+        alert('Save a lottery title before enabling Auto Mode!');
+        return;
+    }
+    rollingFrequencyInput.disabled = !autoModeCheckbox.checked;
+    toggleStartButtonText();
+});
+
+function toggleStartButtonText() {
+    startButton.textContent = autoModeCheckbox.checked ? 'Auto Rolling' : 'Start Rolling';
+}
+
+
+
+
+
+       cancelButton.addEventListener('click', () => {
+    if (pickedNumbers.length > 0) {
+        const cancelledNumber = pickedNumbers.pop();
+        cancelledNumbers.push(cancelledNumber);
+
+        // Show cancellation message in rollingBox
+        rollingBox.innerHTML = `${cancelledNumber}&nbsp;<span class="small-text cancelled-text">(Cancelled Pick & Included in Lottery Again!)</span>`;
+        rollingBox.classList.add('small-text');  // Add small-text class for the message
+        rollingBox.style.fontWeight = 'bold';  // Make the text bold
+
+        resultField.innerHTML = `${cancelledNumber}&nbsp;<span class="small-text cancelled-from-pick">(Pick Cancelled)</span>`;
+        updatePickedNumbersDisplay();
+
+        // Do not revert to "---" here, as the cancellation message should persist
+    } else {
+        // Show an alert if no picked numbers to cancel
+        rollingBox.textContent = 'No Picked Numbers to Cancel!';
+        rollingBox.classList.add('small-text');  // Add small-text class for the message
+        rollingBox.style.fontWeight = 'bold';  // Make the text bold
+
+        // Revert to "---" after a delay
+        setTimeout(() => {
+            rollingBox.textContent = '---';
+            rollingBox.classList.remove('small-text');  // Remove small-text class for "---"
+            rollingBox.style.fontWeight = 'bold';  // Keep bold styling for "---"
+        }, 1000);
+    }
+});
+
+       removeButton.addEventListener('click', () => {
+    if (pickedNumbers.length > 0) {
+        const removedNumber = pickedNumbers.pop();
+        removedNumbers.push(removedNumber);
+
+        // Show removal message in rollingBox
+        rollingBox.innerHTML = `${removedNumber}&nbsp;<span class="small-text removed-text">(Number Removed/ Deleted from Lottery)</span>`;
+        rollingBox.classList.add('small-text');  // Add small-text class for the message
+        rollingBox.style.fontWeight = 'bold';  // Make the text bold
+
+        resultField.innerHTML = `${removedNumber}&nbsp;<span class="small-text removed-from-lottery">(Number Removed/ Deleted from Lottery)</span>`;
+        updatePickedNumbersDisplay();
+
+        // Do not revert to "---" here, as the removal message should persist
+    } else {
+        // Show an alert if no picked numbers to remove
+        rollingBox.textContent = 'No Picked Numbers to Remove!';
+        rollingBox.classList.add('small-text');  // Add small-text class for the message
+        rollingBox.style.fontWeight = 'bold';  // Make the text bold
+
+        // Revert to "---" after a delay
+        setTimeout(() => {
+            rollingBox.textContent = '---';
+            rollingBox.classList.remove('small-text');  // Remove small-text class for "---"
+            rollingBox.style.fontWeight = 'bold';  // Keep bold styling for "---"
+        }, 1000);
+    }
+});
+
+resetButton.addEventListener('click', () => {
+    // Check for rolling data
+    const hasRollingData = pickedNumbers.length > 0 || removedNumbers.length > 0 || cancelledNumbers.length > 0;
+
+    // Check if specific input fields are empty
+    const isNumberInputEmpty = !startRangeInput.value && !endRangeInput.value;
+    const isTitleInputEmpty = !lotteryHeaderInput.value;
+    const isLotteryNameEmpty = !lotteryName;
+
+    // Determine the appropriate message for RollingStatusBox
+    if (hasRollingData) {
+        rollingBox.textContent = (isNumberInputEmpty && isTitleInputEmpty && isLotteryNameEmpty) ? 
+            'Resetting...' : 'Resetting All!';
+    } else {
+        rollingBox.textContent = (isNumberInputEmpty && isTitleInputEmpty && isLotteryNameEmpty) ? 
+            'Nothing to Reset!' : 'Clearing Inputs!';
+    }
+
+    rollingBox.classList.remove('small-text');
+
+    setTimeout(() => {
+        // Clear all input fields dynamically except the Rolling Frequency Input's value
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            // Skip the Rolling Frequency Input field
+            if (field.id !== 'rollingFrequencyInput') {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.checked = field.defaultChecked; // Reset checkboxes/radio buttons to their original state
+                } else {
+                    field.value = field.defaultValue; // Reset text inputs, number fields, dropdowns, etc.
+                }
+
+                // Remove any applied attributes (fully restores fields)
+                field.removeAttribute('disabled');
+                field.removeAttribute('readonly');
+            } else {
+                // Clear the value of Rolling Frequency Input but preserve its state
+                field.value = '';
+            }
+        });
+
+        // Clear specific output fields
+        resultField.textContent = '-';
+        lotteryNameDisplay.textContent = '';
+
+        // Reset stored variables
+        pickedNumbers = [];
+        removedNumbers = [];
+        cancelledNumbers = [];
+        lotteryName = '';
+
+        // Restore button states
+        startButton.textContent = 'Start Rolling';
+        startButton.style.backgroundColor = '#28a745';
+
+        // Ensure UI updates reflect reset state
+        updatePickedNumbersDisplay();
+        updateOutlineBasedOnInput();
+        enableButtons();
+        
+        rollingBox.textContent = '---';
+    }, 1000);
+});
+
+
+
+
+
+document.getElementById('download').addEventListener('click', () => {
+    const autoModeChecked = document.getElementById('autoModeCheckbox').checked;
+
+    if (pickedNumbers.length === 0 && cancelledNumbers.length === 0 && removedNumbers.length === 0) {
+        showModal("No Rolling has been found to Download!", 2000);
+        return;
+    }
+
+    if (!autoModeChecked && !checkIfAllNumbersRolled()) {
+        showConfirmationModal("Not all numbers have been rolled. Do you still want to proceed with the download?", (proceed) => {
+            if (proceed) {
+                downloadLotteryDetails(autoModeChecked);
+            }
+        });
+        return;
+    }
+
+    downloadLotteryDetails(autoModeChecked);
+});
+
+function checkIfAllNumbersRolled() {
+    const startRange = parseInt(document.getElementById('startRange').value);
+    const endRange = parseInt(document.getElementById('endRange').value);
+    const totalNumbers = endRange - startRange + 1;
+    return pickedNumbers.length + cancelledNumbers.length + removedNumbers.length >= totalNumbers;
+}
+
+function downloadLotteryDetails(autoModeChecked) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const lotteryHeader = document.getElementById('lotteryHeader');
+    const savedLotteryName = lotteryName.trim();
+
+    const currentTitle = lotteryHeader && lotteryHeader.value ? lotteryHeader.value.trim() : "";
+    const isUnknownLottery = !(currentTitle === savedLotteryName && savedLotteryName !== "");
+    const lotteryTitleSection = isUnknownLottery ? "Unknown Lottery" : `Lottery Title: ${savedLotteryName}`;
+
+    const startRange = parseInt(document.getElementById('startRange').value);
+    const endRange = parseInt(document.getElementById('endRange').value);
+    const totalNumbers = endRange - startRange + 1;
+
+    const status = autoModeChecked
+        ? "Completed (AutoMode); Authorized by MMD"
+        : checkIfAllNumbersRolled()
+            ? "Completed; Authorized by MMD"
+            : "Incomplete; Authorized by MMD";
+
+    const dateTime = new Date().toLocaleString();
+
+    // Rolling Frequency Calculation
+    let rollingFrequency = "N/A"; 
+    if (autoModeChecked) {
+        const rolledCount = pickedNumbers.length; 
+        const frequencyPercentage = ((rolledCount / totalNumbers) * 100).toFixed(2);
+        rollingFrequency = `${rolledCount} times (${frequencyPercentage}%)`;
+    }
+
+    // **Title in Purple**
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor("#800080"); // Purple
+    doc.setFontSize(16);
+    doc.text("Lottery Details", 105, 20, { align: "center" });
+
+// **Exact Divider in Black**
+doc.setFontSize(12);
+doc.setTextColor(0, 0, 0); // Black color
+doc.text("----------------------------", 105, 28, { align: "center" }); // Same divider as before
+
+
+    // **All Other Details in Blue**
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor("#0000FF"); // Blue
+    doc.setFontSize(12);
+
+    let y = 40;
+    const content = [
+        `${lotteryTitleSection}`,
+        `Actual Lottery Range: ${startRange} - ${endRange}`,
+        `Rolling Frequency: ${rollingFrequency}`,
+        `Total Numbers in Range: ${totalNumbers}`,
+        `Picked Numbers: ${pickedNumbers.join(", ")} (${pickedNumbers.length})`,
+        `Cancelled Numbers: ${cancelledNumbers.join(", ")} (${cancelledNumbers.length})`,
+        `Removed Numbers: ${removedNumbers.join(", ")} (${removedNumbers.length})`,
+        `Status: ${status}`
+    ];
+
+    content.forEach(line => {
+        doc.text(line, 105, y, { align: "center" });
+        y += 10;
+    });
+
+
+// **Extra Line Gap before Date-Time**
+y += 10; // Added extra line gap before Date-Time
+
+    // **Date & Time in Green**
+    doc.setTextColor("#008000"); // Green
+    doc.text(`Date-Time: ${dateTime}`, 105, y, { align: "center" });
+
+    // Add Watermarks
+    addWatermarks(doc);
+
+    doc.save("Lottery_Details.pdf");
+    showModal("Download Completed", 2000);
+}
+
+function addWatermarks(doc) {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(150);
+    doc.setGState(new doc.GState({ opacity: 0.2 })); 
+
+    const watermarkText = "LotteryMachine by Mriganka (MMD)";
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // **Center Watermark (Main, Large One)**
+    doc.setFontSize(30);
+    doc.text(watermarkText, pageWidth / 4, pageHeight / 2, { angle: 45 });
+
+    // **Diagonal Watermarks (Smaller, Filling All Gaps)**
+    doc.setFontSize(22);
+
+    const startX = -50;
+    const startY = 30;
+    const stepY = 45;
+    const stepX = 75;
+
+    const centerX = pageWidth / 2;
+    const centerY = pageHeight / 2;
+    const exclusionRadiusX = 100;
+    const exclusionRadiusY = 60;
+
+    for (let y = startY; y < pageHeight + 100; y += stepY) {
+        for (let x = startX; x < pageWidth + 100; x += stepX) {
+            if (
+                Math.abs(x - centerX) < exclusionRadiusX &&
+                Math.abs(y - centerY) < exclusionRadiusY
+            ) {
+                if (y < centerY - exclusionRadiusY) {
+                    doc.text(watermarkText, x, y - 20, { angle: 45 });
+                } else if (y > centerY + exclusionRadiusY) {
+                    doc.text(watermarkText, x, y + 20, { angle: 45 });
+                }
+                continue;
+            }
+            doc.text(watermarkText, x, y, { angle: 45 });
+        }
+    }
+}
+
+// Modal Functions
+function showModal(message, duration) {
+    const modal = createModal(message);
+    document.body.appendChild(modal);
+    setTimeout(() => {
+        modal.remove();
+        document.getElementById('rollingBox').innerText = "---";
+    }, duration);
+}
+
+function showConfirmationModal(message, callback) {
+  const modal = createModal(message, true);
+  document.body.appendChild(modal);
+
+  const confirmButton = modal.querySelector('.modal-confirm');
+  const cancelButton = modal.querySelector('.modal-cancel');
+
+  confirmButton.addEventListener('click', () => {
+    modal.remove();
+    callback(true);
+  });
+
+  cancelButton.addEventListener('click', () => {
+    modal.remove();
+    callback(false);
+  });
+}
+
+function createModal(message, isConfirmation = false) {
+    const modal = document.createElement('div');
+    modal.classList.add('modal');
+    modal.innerHTML = `
+        <div class="modal-content">
+            <p>${message}</p>
+            ${isConfirmation ? '<div class="modal-buttons"><button class="modal-confirm">OK</button><button class="modal-cancel">Cancel</button></div>' : ''}
+        </div>
+    `;
+    return modal;
+}
+
+// Basic CSS for the modal
+const style = document.createElement('style');
+style.textContent = `
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    min-width: 300px;
+}
+.modal-buttons{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:10px;
+}
+.modal-confirm, .modal-cancel{
+    padding:5px 10px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+.modal-confirm{
+    background-color:green;
+    color:white;
+}
+.modal-cancel{
+    background-color:red;
+    color:white;
+}
+`;
+document.head.appendChild(style);
+
+
+
+
+
+
+
+        // Function to format date and time as "DD/MM/YYYY | 00:00:00 Hrs"
+        function formatDateTime() {
+            const now = new Date();
+
+            // Extract date components
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const year = now.getFullYear();
+
+            // Extract time components
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            // Return formatted string
+            return `${day}/${month}/${year} | ${hours}:${minutes}:${seconds} Hrs`;
+        }
+
+        // Function to update the date and time
+        function updateDateTime() {
+            const dateTimeDisplay = document.getElementById('dateTimeDisplay');
+            dateTimeDisplay.textContent = formatDateTime();
+        }
+
+        // Update the date-time display every second
+        setInterval(updateDateTime, 1000);
+
+
+
+        // Initialize on page load
+        updateDateTime();
+
+
+
+(function() {
+    // Create lock button
+    const lockButton = document.createElement('button');
+    lockButton.textContent = "Active";
+    lockButton.id = "lockButton";
+    lockButton.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1003; /* Ensure the button stays on top */
+        padding: 10px 20px;
+        background-color: cyan;
+        color: black;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.3s;
+    `;
+    document.body.appendChild(lockButton);
+
+    // Create modal dynamically
+    const modal = document.createElement('div');
+    modal.id = 'customModal';
+    modal.style.cssText = `
+        display: none;
+        position: fixed;
+        z-index: 1002; 
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.3);
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: cyan;
+        margin: 0;
+        padding: 20px;
+        width: 300px;
+        border-radius: 8px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1003;
+    `;
+
+    const closeSpan = document.createElement('span');
+    closeSpan.innerHTML = '&times;';
+    closeSpan.style.cssText = `
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 28px;
+        cursor: pointer;
+    `;
+
+    const passwordInput = document.createElement('input');
+    passwordInput.type = 'password';
+    passwordInput.placeholder = 'Password';
+    passwordInput.style.cssText = `
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+    `;
+
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit';
+    submitBtn.style.cssText = `
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    `;
+
+    const errorMsg = document.createElement('div');
+    errorMsg.textContent = 'Incorrect password!';
+    errorMsg.style.cssText = `
+        color: red;
+        margin-top: 10px;
+        display: none;
+    `;
+
+    modalContent.appendChild(closeSpan);
+    modalContent.appendChild(document.createElement('p')).textContent = 'Enter password:';
+    modalContent.appendChild(passwordInput);
+    modalContent.appendChild(submitBtn);
+    modalContent.appendChild(errorMsg);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .blur-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            pointer-events: none;
+            z-index: 1001;
+            overscroll-behavior: contain;
+        }
+        body.locked {
+            overflow: hidden;
+            height: 100vh;
+            touch-action: none;
+        }
+    `;
+    document.head.appendChild(style);
+
+    let isLocked = false;
+    let overlay = null;
+
+    function createOverlay() {
+        overlay = document.createElement('div');
+        overlay.className = 'blur-overlay';
+        overlay.style.pointerEvents = 'all';
+
+        document.body.classList.add('locked');
+
+        const eventsToBlock = ['click', 'mousedown', 'mouseup', 'mousemove', 'keydown', 'keypress', 'keyup', 'touchstart', 'touchmove', 'touchend'];
+        eventsToBlock.forEach(eventType => {
+            document.addEventListener(eventType, blockEvents, { capture: true });
+        });
+
+        document.body.appendChild(overlay);
+    }
+
+    function blockEvents(event) {
+        if (isLocked && event.target !== modal && !modal.contains(event.target) && event.target !== lockButton) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    function removeOverlay() {
+        if (overlay) {
+            overlay.remove();
+            overlay = null;
+            document.body.classList.remove('locked');
+            const eventsToBlock = ['click', 'mousedown', 'mouseup', 'mousemove', 'keydown', 'keypress', 'keyup', 'touchstart', 'touchmove', 'touchend'];
+            eventsToBlock.forEach(eventType => {
+                document.removeEventListener(eventType, blockEvents, { capture: true });
+            });
+        }
+    }
+
+    // Add the footer text that moves with the page (scroll responsive)
+    const footerText = document.createElement('div');
+    footerText.textContent = "Developed by Mriganka Mohan Das; All Rights Reserved, 2025";
+    footerText.style.cssText = `
+        position: relative;
+        margin-top: 20px;  /* Ensure it's placed at the bottom of the content */
+        font-size: 12px;
+        color: black;  /* Changed to black color */
+        text-align: center;
+        z-index: 1004; /* Ensures the text stays above the blur-overlay */
+	font-family: 'Garamond', serif; /* Applied Garamond font family */
+    `;
+    document.body.appendChild(footerText);  // Always display the footer text
+
+    lockButton.addEventListener('click', () => {
+        modal.style.display = 'block';
+        passwordInput.focus();
+    });
+
+    closeSpan.addEventListener('click', () => {
+        modal.style.display = 'none';
+        passwordInput.value = '';
+        errorMsg.style.display = 'none';
+    });
+
+    submitBtn.addEventListener('click', () => {
+        if (passwordInput.value === "123") {
+            isLocked = !isLocked;
+            lockButton.textContent = isLocked ? "Inactive" : "Active";
+            lockButton.style.backgroundColor = isLocked ? "orange" : "cyan";
+            isLocked ? createOverlay() : removeOverlay();
+            modal.style.display = 'none';
+            passwordInput.value = '';
+            errorMsg.style.display = 'none';
+        } else {
+            errorMsg.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    });
+})();
+
+
+
+
+// Custom Modal Implementation
+(function() {
+    let modal = null;
+    let overlay = null;
+
+    // Create modal structure
+    const createModal = () => {
+        if (modal) return; // If modal already exists, return
+        
+        // Overlay for background blur effect
+        overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.zIndex = '9998';
+        overlay.style.display = 'none';
+
+        document.body.appendChild(overlay);
+
+        // Modal container
+        modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.padding = '20px';
+        modal.style.backgroundColor = '#fff';
+        modal.style.border = 'none';
+        modal.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+        modal.style.zIndex = '9999';
+        modal.style.display = 'none';
+        modal.style.maxWidth = '90vw';
+        modal.style.width = '400px';
+        modal.style.borderRadius = '10px';
+        modal.style.textAlign = 'center';
+        modal.style.fontFamily = 'Arial, sans-serif';
+
+        // Modal content
+        const content = document.createElement('div');
+        content.style.fontSize = '16px';
+        content.style.color = '#333';
+        modal.appendChild(content);
+
+        // Close button container (ensures centering)
+        const closeButtonContainer = document.createElement('div');
+        closeButtonContainer.style.display = 'flex';
+        closeButtonContainer.style.justifyContent = 'center';
+        closeButtonContainer.style.marginTop = '15px';
+
+        // Close button
+        const closeButton = document.createElement('button');
+        closeButton.innerText = 'Close';
+        closeButton.style.padding = '8px 20px';
+        closeButton.style.backgroundColor = '#007bff';
+        closeButton.style.color = 'white';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '5px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.fontSize = '14px';
+        closeButton.style.transition = 'background 0.3s';
+        closeButton.addEventListener('mouseover', () => closeButton.style.backgroundColor = '#0056b3');
+        closeButton.addEventListener('mouseout', () => closeButton.style.backgroundColor = '#007bff');
+        closeButton.addEventListener('click', closeModal);
+
+        // Append button inside the container
+        closeButtonContainer.appendChild(closeButton);
+        modal.appendChild(closeButtonContainer);
+
+        document.body.appendChild(modal);
+    };
+
+    // Close modal
+    const closeModal = () => {
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    };
+
+    // Show the modal
+    const showModal = (message, type) => {
+        createModal();
+        
+        // Clear previous content
+        modal.querySelector('div').innerText = message;
+        modal.style.display = 'block';
+        overlay.style.display = 'block';
+
+        // Hide close button for alerts
+        modal.querySelector('button').style.display = type === 'alert' ? 'block' : 'none';
+
+        // Disable scrolling in background
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Override alert
+    window.alert = (message) => {
+        showModal(message, 'alert');
+    };
+
+})();
+
+(function() {
+    // Function to create and display modal with dynamic message
+    function showModal(message) {
+        // If a modal is already shown, don't show another one
+        if (document.getElementById('dynamicModal')) {
+            return;
+        }
+
+        // Create modal structure dynamically
+        const modal = document.createElement('div');
+        modal.id = 'dynamicModal';
+        modal.style.cssText = `
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        `;
+
+        const messageText = document.createElement('p');
+        messageText.textContent = message;
+        messageText.style.cssText = `
+            font-size: 18px;
+            color: #333;
+        `;
+
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Close';
+        closeButton.style.cssText = `
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        `;
+        closeButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.removeChild(modal);
+        });
+
+        modalContent.appendChild(messageText);
+        modalContent.appendChild(closeButton);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Auto-close the modal after 3 seconds
+        setTimeout(function() {
+            modal.style.display = 'none';
+            document.body.removeChild(modal);
+        }, 3000);
+    }
+     
+    // Function to prevent default actions and show modal messages accordingly
+    function preventDefaultActions(event) {
+        const specialKeys = ['F5', 'Ctrl+R', 'Meta+R', 'Ctrl+Shift+R', 'Meta+Shift+R'];
+
+        // Prevent F5 and other reload or refresh triggers
+        if (event.key === 'F5' || (event.ctrlKey && event.key === 'r') || (event.metaKey && event.key === 'r')) {
+            event.preventDefault();
+            showModal("Page refresh is disabled!");
+        }
+
+        // Prevent context menu (Right-click) and prevent Ctrl/Meta key combinations
+        if (event.type === 'keydown' && (event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'v' || event.key === 'x' || event.key === 'z')) {
+            event.preventDefault();
+            showModal("Copy, Paste, and Cut are disabled!");
+        }
+
+        // Prevent Print Dialog (Ctrl + P and others)
+        if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+            event.preventDefault();
+            showModal("Printing is disabled!");
+        }
+
+        // Prevent 'Ctrl+Shift+S' for saving a webpage
+        if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+            event.preventDefault();
+            showModal("Web capture is disabled!");
+        }
+
+        // Prevent 'Ctrl+I' for inspect element
+        if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+            event.preventDefault();
+            showModal("Inspect Element is disabled!");
+        }
+
+        // Prevent 'Ctrl+U' for view source
+        if ((event.ctrlKey || event.metaKey) && event.key === 'u') {
+            event.preventDefault();
+            showModal("View source is disabled!");
+        }
+
+        // Block any keypress involving 'Ctrl' or 'Shift', except for typing uppercase letters
+      if (event.ctrlKey || (event.shiftKey && !event.key.match(/[a-zA-Z0-9]/) && !event.key.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/))) {
+    event.preventDefault();
+    showModal("Ctrl and Shift key combinations are permanently disabled!");
+}
+    }
+
+    // Prevent 'F5' and refresh combinations
+    window.addEventListener('keydown', function(event) {
+        if (event.key === 'F5' || (event.ctrlKey && event.key === 'r') || (event.metaKey && event.key === 'r')) {
+            event.preventDefault();
+            showModal("Page refresh is disabled!");
+        }
+    });
+
+(function() {
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let isSwipeDown = false;
+    let lastScrollTop = 0;
+    let isHorizontalScroll = false;
+
+    window.addEventListener('touchstart', function(event) {
+        touchStartY = event.touches[0].clientY;
+        touchStartX = event.touches[0].clientX;
+        isSwipeDown = false; // Reset swipe down flag
+        isHorizontalScroll = false; // Reset horizontal scroll detection
+    });
+
+    window.addEventListener('touchmove', function(event) {
+        const touchCurrentY = event.touches[0].clientY;
+        const touchCurrentX = event.touches[0].clientX;
+        
+        // Check if it's a horizontal swipe (left or right)
+        if (Math.abs(touchCurrentX - touchStartX) > Math.abs(touchCurrentY - touchStartY)) {
+            isHorizontalScroll = true;
+        }
+
+        // If horizontal scroll detected, let it pass and return early
+        if (isHorizontalScroll) {
+            return; // Allow horizontal scrolling (left-right)
+        }
+
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const isScrollingUp = lastScrollTop > scrollTop;
+        lastScrollTop = scrollTop;
+
+        // Allow normal scrolling if user is scrolling up or already scrolled down
+        if (isScrollingUp || scrollTop > 0) {
+            return; // Let default behavior happen (scrolling)
+        }
+
+        // Detect swipe down from top to prevent pull-to-refresh
+        if (touchCurrentY > touchStartY) {
+            isSwipeDown = true;
+        }
+
+        if (isSwipeDown && scrollTop === 0) {
+            event.preventDefault();
+            showModal("Swipe down to refresh is disabled!");
+        }
+    }, { passive: false });
+})();
+
+
+    // 3. Disable right-click menu
+    window.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        showModal("Right-click is disabled!");
+    });
+
+    // 4. Prevent common 'Ctrl'/'Meta' key combinations like 'Ctrl+U', 'Ctrl+S' etc.
+    window.addEventListener('keydown', preventDefaultActions);
+
+    // 5. Block the print dialog from opening via the keyboard or menu
+    window.addEventListener('beforeprint', function(event) {
+        event.preventDefault();
+        showModal("Printing is disabled!");
+    });
+
+    // 6. Prevent screenshots using certain methods
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'PrintScreen' || event.key === 'PrtSc') {
+            event.preventDefault();
+            showModal("Screenshots are disabled!");
+        }
+    });
+
+    // 7. Block using 'Ctrl+Shift+S' or 'Ctrl+S' for saving or web capture
+    window.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+            event.preventDefault();
+            showModal("Web capture is disabled!");
+        }
+    });
+
+    // 8. Block 'Ctrl+Shift+S' using 'keydown' and 'keyup' listeners (Extra layer of prevention)
+    window.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+            event.preventDefault();
+            showModal("Web capture is disabled!");
+        }
+    });
+
+    window.addEventListener('keyup', function(event) {
+        if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+            event.preventDefault();
+            showModal("Web capture is disabled!");
+        }
+    });
+})();
+
+
+(function() {
+    // Disable right-click
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+
+    // Disable common shortcuts for saving and inspecting
+    document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey && event.key === 's') || // Ctrl+S
+            (event.ctrlKey && event.key === 'p') || // Ctrl+P
+            (event.key === 'F12') ||               // F12
+            (event.ctrlKey && event.shiftKey && event.key === 'I') || // Ctrl+Shift+I
+            (event.ctrlKey && event.key === 'u')    // Ctrl+U
+        ) {
+            event.preventDefault();
+        }
+
+        // Handle 'Esc' key to remove selection
+        if (event.key === 'Escape') {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
+                activeElement.blur(); // Deselect the input field by removing focus
+            }
+        }
+    });
+
+    // Prevent dragging images or elements
+    document.addEventListener("dragstart", function(event) {
+        event.preventDefault();
+    });
+
+    // Detect and block DevTools opening
+    let devtoolsOpened = false;
+    const devtoolsCheck = setInterval(function() {
+        const before = new Date().getTime();
+        debugger;
+        const after = new Date().getTime();
+        if (after - before > 100) {
+            devtoolsOpened = true;
+            document.body.innerHTML = "<h1>DevTools Detected!</h1>";
+            clearInterval(devtoolsCheck); // Stop checking
+        }
+    }, 1000);
+
+    // Disable text selection globally except in input fields
+    document.body.style.userSelect = "none"; // Disables text selection for modern browsers
+    document.body.style.webkitUserSelect = "none"; // For Safari/Chrome
+    document.body.style.mozUserSelect = "none"; // For Firefox
+    document.body.style.msUserSelect = "none"; // For IE/Edge
+
+    // Allow selection inside input and textarea elements
+    const inputElements = document.querySelectorAll('input, textarea');
+    inputElements.forEach(function(input) {
+        input.style.userSelect = "text";
+        input.addEventListener('mousedown', function(event) {
+            event.stopPropagation(); // Allow mouse interactions within inputs
+        });
+    });
+
+    // Allow deselection when clicking outside input elements
+    document.addEventListener('mousedown', function(event) {
+        if (!event.target.closest('input, textarea')) { // If click is outside input/textarea
+            window.getSelection().removeAllRanges(); // Remove any text selection
+        }
+    });
+
+})();
+
+
+    const lockKey = "siteLocked";
+    if (localStorage.getItem(lockKey) === "true") {
+        alert("The site is locked by the admin.");
+        window.location.replace("index.html"); // Redirect back to login page
+    }
+
+
+    </script>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</body>
+</html>
+
+
