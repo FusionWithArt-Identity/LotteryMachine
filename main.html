@@ -82,69 +82,82 @@
         document.body.appendChild(logoutButton);
     };
 
-    // Function to Block Refresh and Navigation
-    function blockNavigation() {
+    // ** FULLY DISABLE NAVIGATION & REFRESH **
+    function fullyBlockBrowserPanel() {
+        // ** 1️⃣ Prevent Back & Forward Buttons **
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.pushState(null, null, location.href);
         };
 
-        // Disable Back and Forward Buttons
-        window.addEventListener("popstate", function (event) {
-            history.pushState(null, null, location.href);
-        });
-
-        // Block Keyboard Shortcuts for Refresh and Navigation
+        // ** 2️⃣ Block All Key Shortcuts (Refresh, Back, Close, Open New Tab) **
         window.addEventListener("keydown", function (e) {
             if (
-                e.key === "F5" || // Refresh Key
-                (e.ctrlKey && e.key === "r") || // Ctrl + R (Windows/Linux)
-                (e.metaKey && e.key === "r") || // Cmd + R (Mac)
+                e.key === "F5" || // F5 Refresh
+                (e.ctrlKey && e.key === "r") || // Ctrl + R (Windows/Linux Refresh)
+                (e.metaKey && e.key === "r") || // Cmd + R (Mac Refresh)
                 (e.ctrlKey && e.key === "w") || // Ctrl + W (Close Tab)
                 (e.metaKey && e.key === "w") || // Cmd + W (Close Tab)
+                (e.ctrlKey && e.key === "t") || // Ctrl + T (New Tab)
+                (e.metaKey && e.key === "t") || // Cmd + T (New Tab)
+                (e.ctrlKey && e.key === "n") || // Ctrl + N (New Window)
+                (e.metaKey && e.key === "n") || // Cmd + N (New Window)
+                (e.ctrlKey && e.shiftKey && e.key === "t") || // Reopen Closed Tab
                 (e.altKey && e.key === "ArrowLeft") || // Alt + Left (Back)
                 (e.altKey && e.key === "ArrowRight") // Alt + Right (Forward)
             ) {
                 e.preventDefault();
-                alert("Navigation and Refresh are blocked!");
+                alert("Navigation and Refresh are completely blocked!");
             }
         });
 
-        // Prevent Right Click (Optional)
+        // ** 3️⃣ Block Right-Click (Prevents Inspect Element) **
         document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-        // Detect if user tries to leave or refresh page
-        window.addEventListener("beforeunload", function (event) {
-            event.preventDefault();
-            event.returnValue = "";
-        });
-
-        // Block Dragging URL to Open in New Tab
+        // ** 4️⃣ Prevent Dragging URL to Another Tab **
         document.addEventListener("dragstart", function (e) {
             e.preventDefault();
         });
+
+        // ** 5️⃣ Block Address Bar Refresh (BeforeUnload) **
+        window.addEventListener("beforeunload", function (event) {
+            event.preventDefault();
+            event.returnValue = "You cannot refresh or leave this page!";
+        });
+
+        // ** 6️⃣ Detect Close Tab and Reopen the Page **
+        window.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+                window.location.href = location.href;
+            }
+        });
+
+        // ** 7️⃣ Block DevTools Open (Optional) **
+        setInterval(() => {
+            if (
+                window.outerHeight - window.innerHeight > 200 ||
+                window.outerWidth - window.innerWidth > 200
+            ) {
+                document.body.innerHTML = "<h1>Developer Tools Detected! Closing...</h1>";
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            }
+        }, 1000);
     }
 
-    // Function to Unlock Navigation (Only for Admin)
-    function allowNavigation() {
-        window.onpopstate = null;
-        window.removeEventListener("keydown", blockNavigation);
-        window.removeEventListener("contextmenu", blockNavigation);
-    }
-
-    // Apply Navigation Blocking
-    blockNavigation();
+    // Apply Browser Blocking
+    fullyBlockBrowserPanel();
 
     // Firestore Listener for Lock Settings
     onSnapshot(lockRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().backNavigationLocked) {
-            blockNavigation();
-        } else {
-            allowNavigation();
+            fullyBlockBrowserPanel();
         }
     });
 
 </script>
+
 
 
 
