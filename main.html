@@ -73,12 +73,36 @@
             if (choice) {
                 sessionStorage.removeItem("authToken");
                 localStorage.removeItem("sessionActive");
+                localStorage.removeItem("dynamicData"); // Clear saved dynamic data
                 window.location.replace("index.html");
             }
             document.getElementById("logoutModal").style.display = "none";
         };
 
+        // Save and Restore Dynamic Data
+        function saveDynamicData(data) {
+            localStorage.setItem("dynamicData", JSON.stringify(data));
+        }
+
+        function restoreDynamicData() {
+            const data = localStorage.getItem("dynamicData");
+            return data ? JSON.parse(data) : null;
+        }
+
+        // Example: Save and Restore Dynamic Data
         window.onload = function () {
+            // Restore dynamic data on page load
+            const savedData = restoreDynamicData();
+            if (savedData) {
+                console.log("Restored Data:", savedData);
+                // Use the restored data to rebuild the interface
+            }
+
+            // Example: Generate and save dynamic data
+            const dynamicData = { example: "This is dynamic data" };
+            saveDynamicData(dynamicData);
+
+            // Add Logout Button
             const logoutButton = document.createElement("button");
             logoutButton.textContent = "Logout";
             logoutButton.onclick = logout;
@@ -131,7 +155,9 @@
         document.addEventListener('deviceready', function() {
             document.addEventListener('backbutton', function(event) {
                 event.preventDefault();
-                window.location.replace("main.html");
+                if (localStorage.getItem("sessionActive") === "true") {
+                    window.location.replace("main.html");
+                }
             }, false);
         }, false);
 
@@ -142,7 +168,6 @@
         }
     </script>
 </head>
-
 
 <body>
    <head>
