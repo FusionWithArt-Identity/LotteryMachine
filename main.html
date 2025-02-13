@@ -73,36 +73,12 @@
             if (choice) {
                 sessionStorage.removeItem("authToken");
                 localStorage.removeItem("sessionActive");
-                localStorage.removeItem("dynamicData"); // Clear saved dynamic data
                 window.location.replace("index.html");
             }
             document.getElementById("logoutModal").style.display = "none";
         };
 
-        // Save and Restore Dynamic Data
-        function saveDynamicData(data) {
-            localStorage.setItem("dynamicData", JSON.stringify(data));
-        }
-
-        function restoreDynamicData() {
-            const data = localStorage.getItem("dynamicData");
-            return data ? JSON.parse(data) : null;
-        }
-
-        // Example: Save and Restore Dynamic Data
         window.onload = function () {
-            // Restore dynamic data on page load
-            const savedData = restoreDynamicData();
-            if (savedData) {
-                console.log("Restored Data:", savedData);
-                // Use the restored data to rebuild the interface
-            }
-
-            // Example: Generate and save dynamic data
-            const dynamicData = { example: "This is dynamic data" };
-            saveDynamicData(dynamicData);
-
-            // Add Logout Button
             const logoutButton = document.createElement("button");
             logoutButton.textContent = "Logout";
             logoutButton.onclick = logout;
@@ -150,22 +126,6 @@
             event.preventDefault();
             event.returnValue = "Are you sure you want to refresh the page?";
         });
-
-        // Disable Hardware Back Keys on Mobile Devices
-        document.addEventListener('deviceready', function() {
-            document.addEventListener('backbutton', function(event) {
-                event.preventDefault();
-                if (localStorage.getItem("sessionActive") === "true") {
-                    window.location.replace("main.html");
-                }
-            }, false);
-        }, false);
-
-        // Open in a New Popup Window
-        if (window.opener === null) {
-            window.open('main.html', '_blank', 'toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600');
-            window.close();
-        }
     </script>
 </head>
 
@@ -176,214 +136,207 @@
     <title>Lottery Machine</title>
     </head>
 
-<style>
+  <style>
+        /* Your Existing CSS */
+        #dateTimeDisplay {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.8em;
+            color: #333;
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-weight: bold;
+        }
 
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #357abd;
+            --background-gradient: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            --container-bg: rgba(255, 255, 255, 0.9);
+            --container-border: rgba(255, 255, 255, 0.3);
+            --container-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --button-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --button-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
 
-#dateTimeDisplay {
-    position: absolute;
-    top: 10px; /* Adjust top position inside the box */
-    right: 20px; /* Adjust right position inside the box */
-    font-size: 0.8em;
-    color: #333;
-    background-color: #fff;
-    padding: 5px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    text-align: center;
-    font-weight: bold;
-}
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background: var(--background-gradient);
+            color: black;
+            line-height: 1.6;
+            overflow: auto;
+        }
 
+        .container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+            background: var(--container-bg);
+            border: 1px solid var(--container-border);
+            border-radius: 16px;
+            box-shadow: var(--container-shadow);
+            backdrop-filter: blur(10px);
+            overflow: auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform, box-shadow;
+        }
 
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--button-hover-shadow);
+        }
 
+        h1, h2, h3 {
+            color: black;
+            margin-bottom: 20px;
+        }
 
+        p {
+            color: black;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
 
+        button, .button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: var(--button-shadow);
+            will-change: background, transform, box-shadow;
+        }
 
-/* Modernized and Optimized CSS */
-:root {
-    --primary-color: #4a90e2;
-    --secondary-color: #357abd;
-    --background-gradient: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-    --container-bg: rgba(255, 255, 255, 0.9);
-    --container-border: rgba(255, 255, 255, 0.3);
-    --container-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    --button-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --button-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
+        button:hover, .button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--button-hover-shadow);
+        }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
-    background: var(--background-gradient);
-    color: black;
-    line-height: 1.6;
-    overflow: auto;
-}
+        button:active, .button:active {
+            background: #2a5d8a;
+            transform: translateY(0);
+            box-shadow: var(--button-shadow);
+        }
 
-.container {
-    position: relative;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px;
-    background: var(--container-bg);
-    border: 1px solid var(--container-border);
-    border-radius: 16px;
-    box-shadow: var(--container-shadow);
-    backdrop-filter: blur(10px);
-    overflow: auto;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform, box-shadow;
-}
+        .button-secondary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
 
-.container:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--button-hover-shadow);
-}
+        .button-secondary:hover {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+        }
 
-h1, h2, h3 {
-    color: black;
-    margin-bottom: 20px;
-}
+        .button-secondary:active {
+            background: rgba(74, 144, 226, 0.2);
+        }
 
-p {
-    color: black;
-    font-size: 1.1em;
-    line-height: 1.8;
-}
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                border-radius: 12px;
+            }
 
-button, .button {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: var(--button-shadow);
-    will-change: background, transform, box-shadow;
-}
+            body {
+                padding: 10px;
+            }
+        }
 
-button:hover, .button:hover {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--button-hover-shadow);
-}
+        input {
+            width: calc(20% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
 
-button:active, .button:active {
-    background: #2a5d8a;
-    transform: translateY(0);
-    box-shadow: var(--button-shadow);
-}
+        button#start {
+            background-color: #28a745;
+            border: 2px solid #1e7e34;
+            box-shadow: var(--button-shadow);
+        }
 
-.button-secondary {
-    background: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-}
+        button#start:active {
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.8);
+            border: 2px solid #155724;
+        }
 
-.button-secondary:hover {
-    background: rgba(74, 144, 226, 0.1);
-    color: var(--primary-color);
-}
+        button#reset {
+            background-color: #b22222;
+            border: 2px solid #7f1a1a;
+            box-shadow: var(--button-shadow);
+        }
 
-.button-secondary:active {
-    background: rgba(74, 144, 226, 0.2);
-}
+        button#reset:active {
+            box-shadow: 0 0 15px rgba(178, 34, 34, 0.8);
+            border: 2px solid #5a1212;
+        }
 
-@media (max-width: 768px) {
-    .container {
-        padding: 20px;
-        border-radius: 12px;
-    }
+        button#cancel {
+            background-color: #CD5C5C;
+            border: 2px solid #b22222;
+            box-shadow: var(--button-shadow);
+        }
 
-    body {
-        padding: 10px;
-    }
-}
+        button#cancel:active {
+            box-shadow: 0 0 15px rgba(205, 92, 92, 0.8);
+            border: 2px solid #8b0000;
+        }
 
-input {
-    width: calc(20% - 22px);
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
+        button#remove {
+            background-color: #FF0000;
+            border: 2px solid #b20000;
+            box-shadow: var(--button-shadow);
+        }
 
-button#start {
-    background-color: #28a745;
-    border: 2px solid #1e7e34;
-    box-shadow: var(--button-shadow);
-}
+        button#remove:active {
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+            border: 2px solid #8b0000;
+        }
 
-button#start:active {
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.8);
-    border: 2px solid #155724;
-}
+        button#download {
+            background-color: #808000;
+            border: 2px solid #666600;
+            box-shadow: var(--button-shadow);
+        }
 
-button#reset {
-    background-color: #b22222;
-    border: 2px solid #7f1a1a;
-    box-shadow: var(--button-shadow);
-}
+        button#download:active {
+            box-shadow: 0 0 15px rgba(128, 128, 0, 0.8);
+            border: 2px solid #4d4d00;
+        }
 
-button#reset:active {
-    box-shadow: 0 0 15px rgba(178, 34, 34, 0.8);
-    border: 2px solid #5a1212;
-}
+        button#unsaveName, button#saveName {
+            background-color: #808080;
+            border: 2px solid #505050;
+            box-shadow: var(--button-shadow);
+        }
 
-button#cancel {
-    background-color: #CD5C5C;
-    border: 2px solid #b22222;
-    box-shadow: var(--button-shadow);
-}
+        button#unsaveName:active, button#saveName:active {
+            box-shadow: 0 0 15px rgba(128, 128, 128, 0.8);
+            border: 2px solid #303030;
+        }
 
-button#cancel:active {
-    box-shadow: 0 0 15px rgba(205, 92, 92, 0.8);
-    border: 2px solid #8b0000;
-}
+        button#unsaveName:focus, button#saveName:focus {
+            outline: 2px solid black;
+        }
 
-button#remove {
-    background-color: #FF0000;
-    border: 2px solid #b20000;
-    box-shadow: var(--button-shadow);
-}
-
-button#remove:active {
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-    border: 2px solid #8b0000;
-}
-
-button#download {
-    background-color: #808000;
-    border: 2px solid #666600;
-    box-shadow: var(--button-shadow);
-}
-
-button#download:active {
-    box-shadow: 0 0 15px rgba(128, 128, 0, 0.8);
-    border: 2px solid #4d4d00;
-}
-
-button#unsaveName, button#saveName {
-    background-color: #808080;
-    border: 2px solid #505050;
-    box-shadow: var(--button-shadow);
-}
-
-button#unsaveName:active, button#saveName:active {
-    box-shadow: 0 0 15px rgba(128, 128, 128, 0.8);
-    border: 2px solid #303030;
-}
-
-button#unsaveName:focus, button#saveName:focus {
-    outline: 2px solid black;
-}
-
-.rolling-box {
+        .rolling-box {
             margin: 20px 0;
             font-size: 24px;
             font-weight: bold;
@@ -394,69 +347,121 @@ button#unsaveName:focus, button#saveName:focus {
             border: 1px dashed #ccc;
             border-radius: 5px;
         }
-     
+
         .rolling-box.small-text {
             font-size: 20px;
             font-weight: bold;
         }
+
         #result {
             color: purple;
             font-size: 24px;
             font-weight: bold;
         }
+
         .picked-numbers {
             margin-top: 20px;
             font-size: 16px;
             font-style: italic;
             font-weight: bold;
         }
+
         .picked-numbers span {
             color: #22CE83;
         }
+
         .small-text {
             font-size: 12px;
         }
+
         .cancelled-text {
             color: grey;
         }
+
         .cancelled-from-pick {
             color: #CD5C5C;
         }
+
         .removed-text {
             color: #FF0000;
         }
+
         .removed-from-lottery {
             color: #FF0000;
         }
+
         #lotteryHeader {
             margin-top: 20px;
             font-size: 16px;
             width: 40%;
         }
+
         #lotteryNameDisplay {
             margin-top: 10px;
             font-size: 18px;
             font-weight: bold;
         }
-        
 
-/* Updated style for outline colors */
-.saved-title {
-    border: 2px solid #32CD32; /* Light green border when saved and matching */
-}
-.unsaved-title {
-    border: 2px solid grey; /* Grey outline when not saved or blank */
-}
-.different-title {
-    border: 2px solid yellow; /* Yellow outline when input differs from saved title */
-}
-.unsaved-title-orange {
-    border: 2px solid orange; /* Orange outline when the saved title is removed/unsaved */
-}
+        .saved-title {
+            border: 2px solid #32CD32; /* Light green border when saved and matching */
+        }
 
+        .unsaved-title {
+            border: 2px solid grey; /* Grey outline when not saved or blank */
+        }
 
+        .different-title {
+            border: 2px solid yellow; /* Yellow outline when input differs from saved title */
+        }
 
-</style>
+        .unsaved-title-orange {
+            border: 2px solid orange; /* Orange outline when the saved title is removed/unsaved */
+        }
+
+        /* Fix for Logout Button */
+        #logoutButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            z-index: 1000; /* Ensure it's above other elements */
+        }
+
+        /* Fix for Lock Button */
+        #lockButton {
+            background-color: #ffcc00;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #lockButton:active {
+            background-color: #e6b800;
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            #logoutButton {
+                top: 5px;
+                right: 5px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            #lockButton {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
 
 
 <body>
