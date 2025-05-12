@@ -441,6 +441,37 @@
             }
         });
     </script>
+<script>
+(function () {
+  // Create a <style> element with keyframes and body background animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes smoothBackgroundMovement {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .dynamic-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(120deg, #87ceeb, #f0e68c, #ff7f50, #9370db);
+      background-size: 300% 300%;
+      animation: smoothBackgroundMovement 20s ease-in-out infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Create the animated background div
+  const bgDiv = document.createElement('div');
+  bgDiv.className = 'dynamic-background';
+  document.body.prepend(bgDiv);
+})();
+</script>
 
 
 </body>
