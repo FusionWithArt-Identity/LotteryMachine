@@ -443,13 +443,14 @@
     </script>
 <script>
 (function () {
-  // Create a <style> element with keyframes and body background animation
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes smoothBackgroundMovement {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    @keyframes blazingFlow {
+      0% { background-position: 0% 50%; filter: brightness(1); }
+      25% { background-position: 50% 100%; filter: brightness(1.2); }
+      50% { background-position: 100% 50%; filter: brightness(1.4); }
+      75% { background-position: 50% 0%; filter: brightness(1.2); }
+      100% { background-position: 0% 50%; filter: brightness(1); }
     }
     .dynamic-background {
       position: fixed;
@@ -457,21 +458,43 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(120deg, #87ceeb, #f0e68c, #ff7f50, #9370db);
-      background-size: 300% 300%;
-      animation: smoothBackgroundMovement 20s ease-in-out infinite;
+      background: linear-gradient(135deg,
+        #ff4500,  /* OrangeRed */
+        #ff6347,  /* Tomato */
+        #ff69b4,  /* Hot Pink */
+        #ffd700,  /* Gold */
+        #00ffff,  /* Aqua */
+        #7fffd4,  /* Aquamarine */
+        #00fa9a,  /* Medium Spring Green */
+        #1e90ff,  /* Dodger Blue */
+        #9400d3,  /* Dark Violet */
+        #ff1493,  /* Deep Pink */
+        #32cd32,  /* Lime Green */
+        #ff8c00,  /* Dark Orange */
+        #ba55d3,  /* Medium Orchid */
+        #f08080,  /* Light Coral */
+        #48d1cc,  /* Medium Turquoise */
+        #8a2be2,  /* Blue Violet */
+        #ffb6c1,  /* Light Pink */
+        #b22222,  /* Firebrick */
+        #f0e68c,  /* Khaki */
+        #20b2aa,  /* Light Sea Green */
+        #ffdead   /* Navajo White */
+      );
+      background-size: 1000% 1000%;
+      animation: blazingFlow 20s ease-in-out infinite;
       z-index: -1;
       pointer-events: none;
     }
   `;
   document.head.appendChild(style);
 
-  // Create the animated background div
   const bgDiv = document.createElement('div');
   bgDiv.className = 'dynamic-background';
   document.body.prepend(bgDiv);
 })();
 </script>
+
 
 
 </body>
